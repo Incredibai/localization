@@ -1,0 +1,29 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "/home/william/catkin_ws/devel/include",
+                "/opt/ros/kinetic/include",
+                "/home/william/catkin_ws/src/LeGO-LOAM/include",
+                "/home/william/catkin_ws/src/loam_velodyne-dev/include",
+                "/home/william/catkin_ws/src/loam_zju/include",
+                "/home/william/catkin_ws/src/test/include",
+                "/home/william/catkin_ws/src/velodyne/velodyne_driver/include",
+                "/home/william/catkin_ws/src/velodyne/velodyne_laserscan/include",
+                "/home/william/catkin_ws/src/velodyne_points_publish/include",
+                "/home/william/catkin_ws/src/velodyne/velodyne_pointcloud/include",
+                "/usr/include"
+            ],
+            "name": "Linux",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}

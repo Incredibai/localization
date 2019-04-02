@@ -1014,7 +1014,7 @@ public:
     }
 
     void visualizeGlobalMapThread(){
-        // ros::Rate rate(0.2);
+
         ros::Rate rate(1);
         while (ros::ok()){
             rate.sleep();
@@ -1067,347 +1067,6 @@ public:
         globalMapKeyFramesDS->clear();
     }
 
-    void loopClosureThread(){
-
-        if (loopClosureEnableFlag == false)
-            return;
-
-        ros::Rate rate(3);
-        while (ros::ok()){
-            rate.sleep();
-            performLoopClosure();
-        }
-    }
-
-    bool detectLoopClosure(){
-
-        latestSurfKeyFrameCloud->clear();
-        nearHistorySurfKeyFrameCloud->clear();
-        nearHistorySurfKeyFrameCloudDS->clear();
-
-        std::lock_guard<std::mutex> lock(mtx);
-
-        std::vector<int> pointSearchIndLoop;
-        std::vector<float> pointSearchSqDisLoop;
-        kdtreeHistoryKeyPoses->setInputCloud(cloudKeyPoses3D);
-        kdtreeHistoryKeyPoses->radiusSearch(currentRobotPosPoint, historyKeyframeSearchRadius, pointSearchIndLoop, pointSearchSqDisLoop, 0);
-        
-        // WILLIAM BEGIN
-        // What if it's actually a loop but the time is less than 50?
-        // That will lead to a wrong match
-        closestHistoryFrameID = -1;
-        for (int i = 0; i < pointSearchIndLoop.size(); ++i){
-            int id = pointSearchIndLoop[i];
-            if (abs(cloudKeyPoses6D->points[id].time - timeLaserOdometry) > 50){
-                closestHistoryFrameID = id;
-                break;
-            }
-        }
-        // WILLIAM END
-
-        if (closestHistoryFrameID == -1){
-            //todo
-            // std::vector<int> GPSpointSearchIndLoop;
-            // std::vector<float> GPSpointSearchSqDisLoop;
-            // kdtreeHistoryGPS->setInputCloud(cloudGPS3D);
-            // kdtreeHistoryGPS->radiusSearch(currentGPSPoint , GPSSearchRadius, GPSpointSearchIndLoop, GPSpointSearchSqDisLoop, 0);
-            
-            // K nearest neighbor search，进行k最近邻搜索
-            
-            kdtreeHistoryGPS->setInputCloud(cloudGPS3D);
-            // std::cout<<"setInputCloud(cloudGPS3D) size:"<<cloudGPS3D->points.size()<<std::endl;
-            // std::cout<<"currentGPSPoint x y z :"<<currentGPSPoint.x<<","<<currentGPSPoint.y<<","<<currentGPSPoint.z<<std::endl;
-		    // int GPSsearchKpoint = 5;                               //设搜索一个点，即：K为1.
-		    std::vector<int> pointIdxNKNSearch(GPSsearchKpoint);   //设置一个类似数组的东西，（我对于C++中vector的理解直接把它当成了数组），pointIdxNKNSearch（K）的长度为K，用于存放点索引
-		    std::vector<float> pointNKNSquaredDistance(GPSsearchKpoint);//同样一个长度为K的数组pointNKNSquaredDistance，用于存放距离的平方
-            if (kdtreeHistoryGPS->nearestKSearch(currentGPSPoint, GPSsearchKpoint, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)//前面定义了kdtree作为搜索对象，然后就可以用它来调用系统的nearestKSearch函数了，注意后面的参数，分别是上面已经定义好的。
-		    {
-			    for (size_t i = 0; i < pointIdxNKNSearch.size(); ++i){
-                    // std::cout << "    " << cloudGPS3D->points[pointIdxNKNSearch[i]].x
-			    	// << " " << cloudGPS3D->points[pointIdxNKNSearch[i]].y
-			    	// << " " << cloudGPS3D->points[pointIdxNKNSearch[i]].z
-			    	// << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
-                    int id = pointIdxNKNSearch[i];
-                    if (abs(cloudKeyPoses6D->points[id].time - timeLaserOdometry) > 50){
-                        closestHistoryFrameID = id;
-                        std::cout<<"closestHistoryFrameID from GPS:"<<closestHistoryFrameID<<std::endl;
-                        PoseLoopCloseDetectFlag = true;
-                        break;
-                    }
-                }    	
-		    }
-
-            // for (int i = 0; i < GPSpointSearchIndLoop.size(); ++i){
-            //     int id = GPSpointSearchIndLoop[i];
-            //     if (abs(cloudKeyPoses6D->points[id].time - timeLaserOdometry) > 50){
-            //         closestHistoryFrameID = id;
-            //         std::cout<<"closestHistoryFrameID from GPS:"<<closestHistoryFrameID<<std::endl;
-            //         break;
-            //     }
-            // }
-            if (closestHistoryFrameID == -1){
-                return false;
-            }
-        }else{
-            std::cout<<"closestHistoryFrameID from Pose:"<<closestHistoryFrameID<<std::endl;
-        }
-
-        if(!PoseLoopCloseDetectFlag){
-            latestFrameIDLoopCloure = cloudKeyPoses3D->points.size() - 1;
-        }else{
-            latestFrameIDLoopCloure = cloudGPS3D->points.size() - 1;
-        }
-         std::cout<<"latestFrameIDLoopCloure:"<<latestFrameIDLoopCloure<<std::endl;
-        // latestFrameIDLoopCloure = cloudKeyPoses3D->points.size() - 1;
-        *latestSurfKeyFrameCloud += *transformPointCloud(cornerCloudKeyFrames[latestFrameIDLoopCloure], &cloudKeyPoses6D->points[latestFrameIDLoopCloure]);
-        *latestSurfKeyFrameCloud += *transformPointCloud(surfCloudKeyFrames[latestFrameIDLoopCloure],   &cloudKeyPoses6D->points[latestFrameIDLoopCloure]);
-
-        pcl::PointCloud<pcl::PointXYZINormal>::Ptr hahaCloud(new pcl::PointCloud<pcl::PointXYZINormal>());
-        int cloudSize = latestSurfKeyFrameCloud->points.size();
-        for (int i = 0; i < cloudSize; ++i){
-            if ((int)latestSurfKeyFrameCloud->points[i].intensity >= 0){
-                hahaCloud->push_back(latestSurfKeyFrameCloud->points[i]);
-            }
-        }
-        latestSurfKeyFrameCloud->clear();
-        *latestSurfKeyFrameCloud   = *hahaCloud;
-
-        std::cout<<"latestSurfKeyFrameCloud size:"<<latestSurfKeyFrameCloud->points.size()<<std::endl;
-
-        for (int j = -historyKeyframeSearchNum; j <= historyKeyframeSearchNum; ++j){
-            if (closestHistoryFrameID + j < 0 || closestHistoryFrameID + j > latestFrameIDLoopCloure)
-                continue;
-            *nearHistorySurfKeyFrameCloud += *transformPointCloud(cornerCloudKeyFrames[closestHistoryFrameID+j], &cloudKeyPoses6D->points[closestHistoryFrameID+j]);
-            *nearHistorySurfKeyFrameCloud += *transformPointCloud(surfCloudKeyFrames[closestHistoryFrameID+j],   &cloudKeyPoses6D->points[closestHistoryFrameID+j]);
-        }
-
-        downSizeFilterHistoryKeyFrames.setInputCloud(nearHistorySurfKeyFrameCloud);
-        downSizeFilterHistoryKeyFrames.filter(*nearHistorySurfKeyFrameCloudDS);
-
-        std::cout<<"nearHistorySurfKeyFrameCloudDS size:"<<nearHistorySurfKeyFrameCloudDS->points.size()<<std::endl;
-
-        if (pubHistoryKeyFrames.getNumSubscribers() != 0){
-            sensor_msgs::PointCloud2 cloudMsgTemp;
-            pcl::toROSMsg(*nearHistorySurfKeyFrameCloudDS, cloudMsgTemp);
-            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserOdometry);
-            cloudMsgTemp.header.frame_id = "/camera_init";
-            pubHistoryKeyFrames.publish(cloudMsgTemp);
-        }
-        
-        if (pubGPSFrames.getNumSubscribers() != 0){
-            sensor_msgs::PointCloud2 cloudMsgTemp;
-            pcl::toROSMsg(*cloudGPS3D, cloudMsgTemp);
-            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserOdometry);
-            cloudMsgTemp.header.frame_id = "/camera_init";
-            pubGPSFrames.publish(cloudMsgTemp);
-        }
-
-        return true;
-    }
-
-
-    void performLoopClosure(){
-
-        // std::cout<<"###### map optmization -> perform loop closure ->" <<std::endl;
-        // std::cout<<"###### cloudKeyPoses3D->points.empty() :"<<cloudKeyPoses3D->points.empty() <<std::endl;
-        // std::cout<<"###### potentialLoopFlag :"<<potentialLoopFlag <<std::endl;
-
-        if (cloudKeyPoses3D->points.empty() == true)
-            return;
-
-        if (potentialLoopFlag == false){
-            if (detectLoopClosure() == true){
-		        if (abs(timeSaveFirstCurrentScanForLoopClosure - timeLaserOdometry) > 30){
-		            std::cout<<"#----------------A NEW LOOPCLOSURE----------------#" <<std::endl;
-	                FitnessScore = historyKeyframeFitnessScore;
-		        }
-                
-                potentialLoopFlag = true;
-                timeSaveFirstCurrentScanForLoopClosure = timeLaserOdometry;
-            }
-            if (potentialLoopFlag == false)
-                return;
-        }
-
-        potentialLoopFlag = false;
-
-        pcl::IterativeClosestPoint<pcl::PointXYZINormal, pcl::PointXYZINormal> icp;
-        // TODO
-        // icp.setMaxCorrespondenceDistance(100);
-        // icp.setMaximumIterations(100);
-        icp.setMaxCorrespondenceDistance(50);
-        icp.setMaximumIterations(150);
-
-        icp.setTransformationEpsilon(1e-6);
-        // icp.setEuclideanFitnessEpsilon(1e-6);
-        icp.setEuclideanFitnessEpsilon(0.01);
-        icp.setRANSACIterations(0);
-
-        icp.setInputSource(latestSurfKeyFrameCloud);
-        icp.setInputTarget(nearHistorySurfKeyFrameCloudDS);
-        pcl::PointCloud<pcl::PointXYZINormal>::Ptr unused_result(new pcl::PointCloud<pcl::PointXYZINormal>());
-        icp.align(*unused_result);
-
-        std::cout<<"      icp.getFitnessScore():"<<icp.getFitnessScore()<<std::endl;
-
-	    //float deltaz = sqrt(cloudKeyPoses3D->points[closestHistoryFrameID].y - cloudKeyPoses3D->points[latestFrameIDLoopCloure].y);
-        if (icp.hasConverged() == false || icp.getFitnessScore() >= FitnessScore)
-            return;
-	    FitnessScore = icp.getFitnessScore();
-        if(FitnessScore<0.3) 
-            FitnessScore = 0.3;
-        
-        if (pubIcpKeyFrames.getNumSubscribers() != 0){
-            pcl::PointCloud<pcl::PointXYZINormal>::Ptr closed_cloud(new pcl::PointCloud<pcl::PointXYZINormal>());
-            pcl::transformPointCloud (*latestSurfKeyFrameCloud, *closed_cloud, icp.getFinalTransformation());
-            sensor_msgs::PointCloud2 cloudMsgTemp;
-            pcl::toROSMsg(*closed_cloud, cloudMsgTemp);
-            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserOdometry);
-            cloudMsgTemp.header.frame_id = "/camera_init";
-            pubIcpKeyFrames.publish(cloudMsgTemp);
-        }   
-
-        float x, y, z, roll, pitch, yaw;
-        Eigen::Affine3f correctionCameraFrame;
-        correctionCameraFrame = icp.getFinalTransformation();
-        pcl::getTranslationAndEulerAngles(correctionCameraFrame, x, y, z, roll, pitch, yaw);
-        Eigen::Affine3f correctionLidarFrame = pcl::getTransformation(z, x, y, yaw, roll, pitch);
-        Eigen::Affine3f tWrong = pclPointToAffine3fCameraToLidar(cloudKeyPoses6D->points[latestFrameIDLoopCloure]);
-        Eigen::Affine3f tCorrect = correctionLidarFrame * tWrong;
-        pcl::getTranslationAndEulerAngles (tCorrect, x, y, z, roll, pitch, yaw);
-        gtsam::Pose3 poseFrom = Pose3(Rot3::RzRyRx(roll, pitch, yaw), Point3(x, y, z));
-        gtsam::Pose3 poseTo = pclPointTogtsamPose3(cloudKeyPoses6D->points[closestHistoryFrameID]);
-        gtsam::Vector Vector6(6);
-        float noiseScore = icp.getFitnessScore();
-        Vector6 << noiseScore, noiseScore, noiseScore, noiseScore, noiseScore, noiseScore;
-        constraintNoise = noiseModel::Diagonal::Variances(Vector6);
-
-        std::lock_guard<std::mutex> lock(mtx);
-        gtSAMgraph.add(BetweenFactor<Pose3>(latestFrameIDLoopCloure, closestHistoryFrameID, poseFrom.between(poseTo), constraintNoise));
-        isam->update(gtSAMgraph);
-        isam->update();
-        gtSAMgraph.resize(0);
-
-        aLoopIsClosed = true;
-    }
-
-    Pose3 pclPointTogtsamPose3(PointTypePose thisPoint){
-    	return Pose3(Rot3::RzRyRx(double(thisPoint.yaw), double(thisPoint.roll), double(thisPoint.pitch)),
-                           Point3(double(thisPoint.z),   double(thisPoint.x),    double(thisPoint.y)));
-    }
-
-    Eigen::Affine3f pclPointToAffine3fCameraToLidar(PointTypePose thisPoint){
-    	return pcl::getTransformation(thisPoint.z, thisPoint.x, thisPoint.y, thisPoint.yaw, thisPoint.roll, thisPoint.pitch);
-    }
-
-    void extractSurroundingKeyFrames(){
-
-        if (cloudKeyPoses3D->points.empty() == true)
-            return;	
-		
-		if (loopClosureEnableFlag == true){
-            if (recentCornerCloudKeyFrames.size() < surroundingKeyframeSearchNum){
-                recentCornerCloudKeyFrames. clear();
-                recentSurfCloudKeyFrames.   clear();
-                recentOutlierCloudKeyFrames.clear();
-                int numPoses = cloudKeyPoses3D->points.size();
-                for (int i = numPoses-1; i >= 0; --i){
-                    int thisKeyInd = (int)cloudKeyPoses3D->points[i].intensity;
-                    PointTypePose thisTransformation = cloudKeyPoses6D->points[thisKeyInd];
-                    updateTransformPointCloudSinCos(&thisTransformation);
-                    recentCornerCloudKeyFrames. push_front(transformPointCloud(cornerCloudKeyFrames[thisKeyInd]));
-                    recentSurfCloudKeyFrames.   push_front(transformPointCloud(surfCloudKeyFrames[thisKeyInd]));
-                    recentOutlierCloudKeyFrames.push_front(transformPointCloud(outlierCloudKeyFrames[thisKeyInd]));
-                    if (recentCornerCloudKeyFrames.size() >= surroundingKeyframeSearchNum)
-                        break;
-                }
-            }else{
-                if (latestFrameID != cloudKeyPoses3D->points.size() - 1){
-
-                    recentCornerCloudKeyFrames. pop_front();
-                    recentSurfCloudKeyFrames.   pop_front();
-                    recentOutlierCloudKeyFrames.pop_front();
-                    latestFrameID = cloudKeyPoses3D->points.size() - 1;
-                    PointTypePose thisTransformation = cloudKeyPoses6D->points[latestFrameID];
-                    updateTransformPointCloudSinCos(&thisTransformation);
-                    recentCornerCloudKeyFrames. push_back(transformPointCloud(cornerCloudKeyFrames[latestFrameID]));
-                    recentSurfCloudKeyFrames.   push_back(transformPointCloud(surfCloudKeyFrames[latestFrameID]));
-                    recentOutlierCloudKeyFrames.push_back(transformPointCloud(outlierCloudKeyFrames[latestFrameID]));
-                }
-            }
-
-            for (int i = 0; i < recentCornerCloudKeyFrames.size(); ++i){
-                *laserCloudCornerFromMap += *recentCornerCloudKeyFrames[i];
-                *laserCloudSurfFromMap   += *recentSurfCloudKeyFrames[i];
-                *laserCloudSurfFromMap   += *recentOutlierCloudKeyFrames[i];
-            }
-		}else{
-            surroundingKeyPoses->clear();
-            surroundingKeyPosesDS->clear();
-
-			kdtreeSurroundingKeyPoses->setInputCloud(cloudKeyPoses3D);
-			kdtreeSurroundingKeyPoses->radiusSearch(currentRobotPosPoint, (double)surroundingKeyframeSearchRadius, pointSearchInd, pointSearchSqDis, 0);
-            
-			for (int i = 0; i < pointSearchInd.size(); ++i)
-                surroundingKeyPoses->points.push_back(cloudKeyPoses3D->points[pointSearchInd[i]]);
-			downSizeFilterSurroundingKeyPoses.setInputCloud(surroundingKeyPoses);
-			downSizeFilterSurroundingKeyPoses.filter(*surroundingKeyPosesDS);
-
-            int numSurroundingPosesDS = surroundingKeyPosesDS->points.size();
-            for (int i = 0; i < surroundingExistingKeyPosesID.size(); ++i){
-                bool existingFlag = false;
-                for (int j = 0; j < numSurroundingPosesDS; ++j){
-                    if (surroundingExistingKeyPosesID[i] == (int)surroundingKeyPosesDS->points[j].intensity){
-                        existingFlag = true;
-                        break;
-                    }
-                }
-                if (existingFlag == false){
-                    surroundingExistingKeyPosesID.   erase(surroundingExistingKeyPosesID.   begin() + i);
-                    surroundingCornerCloudKeyFrames. erase(surroundingCornerCloudKeyFrames. begin() + i);
-                    surroundingSurfCloudKeyFrames.   erase(surroundingSurfCloudKeyFrames.   begin() + i);
-                    surroundingOutlierCloudKeyFrames.erase(surroundingOutlierCloudKeyFrames.begin() + i);
-                    --i;
-                }
-            }
-
-            for (int i = 0; i < numSurroundingPosesDS; ++i) {
-                bool existingFlag = false;
-                for (auto iter = surroundingExistingKeyPosesID.begin(); iter != surroundingExistingKeyPosesID.end(); ++iter){
-                    if ((*iter) == (int)surroundingKeyPosesDS->points[i].intensity){
-                        existingFlag = true;
-                        break;
-                    }
-                }
-                if (existingFlag == true){
-                    continue;
-                }else{
-                    int thisKeyInd = (int)surroundingKeyPosesDS->points[i].intensity;
-                    PointTypePose thisTransformation = cloudKeyPoses6D->points[thisKeyInd];
-                    updateTransformPointCloudSinCos(&thisTransformation);
-                    surroundingExistingKeyPosesID.   push_back(thisKeyInd);
-                    surroundingCornerCloudKeyFrames. push_back(transformPointCloud(cornerCloudKeyFrames[thisKeyInd]));
-                    surroundingSurfCloudKeyFrames.   push_back(transformPointCloud(surfCloudKeyFrames[thisKeyInd]));
-                    surroundingOutlierCloudKeyFrames.push_back(transformPointCloud(outlierCloudKeyFrames[thisKeyInd]));
-                }
-            }
-
-            for (int i = 0; i < surroundingExistingKeyPosesID.size(); ++i) {
-                *laserCloudCornerFromMap += *surroundingCornerCloudKeyFrames[i];
-                *laserCloudSurfFromMap   += *surroundingSurfCloudKeyFrames[i];
-                *laserCloudSurfFromMap   += *surroundingOutlierCloudKeyFrames[i];
-            }
-		}
-
-        downSizeFilterCorner.setInputCloud(laserCloudCornerFromMap);
-        downSizeFilterCorner.filter(*laserCloudCornerFromMapDS);
-        laserCloudCornerFromMapDSNum = laserCloudCornerFromMapDS->points.size();
-
-        downSizeFilterSurf.setInputCloud(laserCloudSurfFromMap);
-        downSizeFilterSurf.filter(*laserCloudSurfFromMapDS);
-        laserCloudSurfFromMapDSNum = laserCloudSurfFromMapDS->points.size();
-    }
-
     void downsampleCurrentScan(){
 
         laserCloudCornerLastDS->clear();
@@ -1452,8 +1111,7 @@ public:
 
             if (pointSearchSqDis[4] < 1.0) {
 
-// WILLIAM BEGIN
-
+                // WILLIAM BEGIN
                 float avrg_intensity = ((pointSel.curvature + laserCloudCornerFromMapDS->points[pointSearchInd[0]].curvature + 
                                                               laserCloudCornerFromMapDS->points[pointSearchInd[1]].curvature + 
                                                               laserCloudCornerFromMapDS->points[pointSearchInd[2]].curvature + 
@@ -1888,33 +1546,6 @@ public:
         outlierCloudKeyFrames.push_back(thisOutlierKeyFrame);
     }
 
-    void correctPoses(){
-    	if (aLoopIsClosed == true){
-            std::cout<<"###### mp -> correctPoses()-> a loop"<<std::endl;
-            recentCornerCloudKeyFrames. clear();
-            recentSurfCloudKeyFrames.   clear();
-            recentOutlierCloudKeyFrames.clear();
-
-            int numPoses = isamCurrentEstimate.size();
-            //std::cout<<"###### mp -> correctPoses()-> numPoses = isamCurrentEstimate.size():"<<numPoses<<std::endl;
-			for (int i = 0; i < numPoses; ++i)
-			{
-				cloudKeyPoses3D->points[i].x = isamCurrentEstimate.at<Pose3>(i).translation().y();
-				cloudKeyPoses3D->points[i].y = isamCurrentEstimate.at<Pose3>(i).translation().z();
-				cloudKeyPoses3D->points[i].z = isamCurrentEstimate.at<Pose3>(i).translation().x();
-
-				cloudKeyPoses6D->points[i].x = cloudKeyPoses3D->points[i].x;
-	            cloudKeyPoses6D->points[i].y = cloudKeyPoses3D->points[i].y;
-	            cloudKeyPoses6D->points[i].z = cloudKeyPoses3D->points[i].z;
-	            cloudKeyPoses6D->points[i].roll  = isamCurrentEstimate.at<Pose3>(i).rotation().pitch();
-	            cloudKeyPoses6D->points[i].pitch = isamCurrentEstimate.at<Pose3>(i).rotation().yaw();
-	            cloudKeyPoses6D->points[i].yaw   = isamCurrentEstimate.at<Pose3>(i).rotation().roll();
-			}
-
-	    	aLoopIsClosed = false;
-	    }
-    }
-
     void clearCloud(){
         laserCloudCornerFromMap->clear();
         laserCloudSurfFromMap->clear();  
@@ -1962,120 +1593,18 @@ public:
 
                 timeLastProcessing = timeLaserOdometry;
 
-/*
-std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
-std::cout << "--------------------------- One Period --------------------------------" << std::endl;            
-std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
-std::cout << "before transformAssociateToMap" << std::endl;
-std::cout << "transformSum[0] " << transformSum[0] << std::endl;
-std::cout << "transformSum[1] " << transformSum[1] << std::endl;
-std::cout << "transformSum[2] " << transformSum[2] << std::endl;
-std::cout << "transformSum[3] " << transformSum[3] << std::endl;
-std::cout << "transformSum[4] " << transformSum[4] << std::endl;
-std::cout << "transformSum[5] " << transformSum[5] << std::endl;
-std::cout << std::endl;
-std::cout << "transformIncre[0] " << transformIncre[0] << std::endl;
-std::cout << "transformIncre[1] " << transformIncre[1] << std::endl;
-std::cout << "transformIncre[2] " << transformIncre[2] << std::endl;
-std::cout << "transformIncre[3] " << transformIncre[3] << std::endl;
-std::cout << "transformIncre[4] " << transformIncre[4] << std::endl;
-std::cout << "transformIncre[5] " << transformIncre[5] << std::endl;
-std::cout << std::endl;
-std::cout << "transformBefMapped[0] " << transformBefMapped[0] << std::endl;
-std::cout << "transformBefMapped[1] " << transformBefMapped[1] << std::endl;
-std::cout << "transformBefMapped[2] " << transformBefMapped[2] << std::endl;
-std::cout << "transformBefMapped[3] " << transformBefMapped[3] << std::endl;
-std::cout << "transformBefMapped[4] " << transformBefMapped[4] << std::endl;
-std::cout << "transformBefMapped[5] " << transformBefMapped[5] << std::endl;
-std::cout << std::endl;
-std::cout << "transformTobeMapped[0] " << transformTobeMapped[0] << std::endl;
-std::cout << "transformTobeMapped[1] " << transformTobeMapped[1] << std::endl;
-std::cout << "transformTobeMapped[2] " << transformTobeMapped[2] << std::endl;
-std::cout << "transformTobeMapped[3] " << transformTobeMapped[3] << std::endl;
-std::cout << "transformTobeMapped[4] " << transformTobeMapped[4] << std::endl;
-std::cout << "transformTobeMapped[5] " << transformTobeMapped[5] << std::endl;
-std::cout << std::endl;
-std::cout << "transformAftMapped[0] " << transformAftMapped[0] << std::endl;
-std::cout << "transformAftMapped[1] " << transformAftMapped[1] << std::endl;
-std::cout << "transformAftMapped[2] " << transformAftMapped[2] << std::endl;
-std::cout << "transformAftMapped[3] " << transformAftMapped[3] << std::endl;
-std::cout << "transformAftMapped[4] " << transformAftMapped[4] << std::endl;
-std::cout << "transformAftMapped[5] " << transformAftMapped[5] << std::endl;
-std::cout << std::endl;
-*/
                 transformAssociateToMap();
-/*
-std::cout << "after transformAssociateToMap" << std::endl;
-std::cout << "transformSum[0] " << transformSum[0] << std::endl;
-std::cout << "transformSum[1] " << transformSum[1] << std::endl;
-std::cout << "transformSum[2] " << transformSum[2] << std::endl;
-std::cout << "transformSum[3] " << transformSum[3] << std::endl;
-std::cout << "transformSum[4] " << transformSum[4] << std::endl;
-std::cout << "transformSum[5] " << transformSum[5] << std::endl;
-std::cout << std::endl;
-std::cout << "transformIncre[0] " << transformIncre[0] << std::endl;
-std::cout << "transformIncre[1] " << transformIncre[1] << std::endl;
-std::cout << "transformIncre[2] " << transformIncre[2] << std::endl;
-std::cout << "transformIncre[3] " << transformIncre[3] << std::endl;
-std::cout << "transformIncre[4] " << transformIncre[4] << std::endl;
-std::cout << "transformIncre[5] " << transformIncre[5] << std::endl;
-std::cout << std::endl;
-std::cout << "transformBefMapped[0] " << transformBefMapped[0] << std::endl;
-std::cout << "transformBefMapped[1] " << transformBefMapped[1] << std::endl;
-std::cout << "transformBefMapped[2] " << transformBefMapped[2] << std::endl;
-std::cout << "transformBefMapped[3] " << transformBefMapped[3] << std::endl;
-std::cout << "transformBefMapped[4] " << transformBefMapped[4] << std::endl;
-std::cout << "transformBefMapped[5] " << transformBefMapped[5] << std::endl;
-std::cout << std::endl;
-std::cout << "transformTobeMapped[0] " << transformTobeMapped[0] << std::endl;
-std::cout << "transformTobeMapped[1] " << transformTobeMapped[1] << std::endl;
-std::cout << "transformTobeMapped[2] " << transformTobeMapped[2] << std::endl;
-std::cout << "transformTobeMapped[3] " << transformTobeMapped[3] << std::endl;
-std::cout << "transformTobeMapped[4] " << transformTobeMapped[4] << std::endl;
-std::cout << "transformTobeMapped[5] " << transformTobeMapped[5] << std::endl;
-std::cout << std::endl;
-std::cout << "transformAftMapped[0] " << transformAftMapped[0] << std::endl;
-std::cout << "transformAftMapped[1] " << transformAftMapped[1] << std::endl;
-std::cout << "transformAftMapped[2] " << transformAftMapped[2] << std::endl;
-std::cout << "transformAftMapped[3] " << transformAftMapped[3] << std::endl;
-std::cout << "transformAftMapped[4] " << transformAftMapped[4] << std::endl;
-std::cout << "transformAftMapped[5] " << transformAftMapped[5] << std::endl;
-std::cout << std::endl;
-*/
-                //extractSurroundingKeyFrames();
 
                 downsampleCurrentScan();
-/*
-std::cout << "before mapOpt" << std::endl;
-std::cout << "transformSum[0] " << transformSum[0] << std::endl;
-std::cout << "transformSum[1] " << transformSum[1] << std::endl;
-std::cout << "transformSum[2] " << transformSum[2] << std::endl;
-std::cout << "transformSum[3] " << transformSum[3] << std::endl;
-std::cout << "transformSum[4] " << transformSum[4] << std::endl;
-std::cout << "transformSum[5] " << transformSum[5] << std::endl;
-std::cout << std::endl;
-*/
+
                 mapOptimizationTime_1 = ros::Time::now().toSec();
                 scan2MapOptimization();
                 mapOptimizationTime_2 = ros::Time::now().toSec();
                 mapOptimizationDuration = mapOptimizationTime_2 - mapOptimizationTime_1;
-/*
-std::cout << "after mapOpt" << std::endl;
-std::cout << "transformSum[0] " << transformSum[0] << std::endl;
-std::cout << "transformSum[1] " << transformSum[1] << std::endl;
-std::cout << "transformSum[2] " << transformSum[2] << std::endl;
-std::cout << "transformSum[3] " << transformSum[3] << std::endl;
-std::cout << "transformSum[4] " << transformSum[4] << std::endl;
-std::cout << "transformSum[5] " << transformSum[5] << std::endl;
-std::cout << std::endl;
-*/
+
                 saveKeyFramesAndFactor();
-                //WILLIAM BEGIN
 
                 pubGPSPosition.publish(GPSPosition); 
-                //WILLIAM END
-
-                //correctPoses();
 
                 publishTF();
 
@@ -2192,17 +1721,6 @@ std::cout << std::endl;
 
                 clearCloud();
 
-
-                /*
-                extern const double DSFCornerLeafSize = 0.2;
-extern const double DSFSurfLeafSize = 0.1;
-extern const double DSFOutlierLeafSize = 0.1;
-extern const double DSFHistoryKeyFramesLeafSize = 0.4;
-extern const double DSFSurroundingKeyPosesLeafSize = 1.0;
-extern const double DSFGlobalMapKeyPosesLeafSize = 1.0;
-extern const double DSFGlobalMapKeyFramesLeafSize = 1.0;
-
-                */
             }
         }
     }
@@ -2217,8 +1735,6 @@ int main(int argc, char** argv)
 
     mapOptimization MO;
 
-    // WILLIAM BEGIN
-    //std::thread loopthread(&mapOptimization::loopClosureThread, &MO);
     std::thread visualizeMapThread(&mapOptimization::visualizeGlobalMapThread, &MO);
 
     ros::Rate rate(200);
@@ -2226,14 +1742,11 @@ int main(int argc, char** argv)
     {
         ros::spinOnce();
 
-
         MO.run();
-        
 
         rate.sleep();
     }
 
-    //loopthread.join();
     visualizeMapThread.join();
 
     return 0;

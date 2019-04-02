@@ -466,10 +466,10 @@ public:
         // WILLIAM BEGIN
         if (!savedOneFrameRawData){
             std::ofstream outfile;
-            outfile.open("/home/william/catkin_ws/src/LeGO-LOAM/data/oneFrameRawData_2");
+            outfile.open("/home/william/data/LeGO-LOAM/oneFrameRawData_2");
             outfile << *laserCloudMsg << std::endl;
             outfile.close();
-            pcl::io::savePCDFile("/home/william/catkin_ws/src/LeGO-LOAM/data/oneFrameRawData_2.pcd", *segmentedCloud, false);
+            pcl::io::savePCDFile("/home/william/data/LeGO-LOAM/oneFrameRawData_2.pcd", *segmentedCloud, false);
             // savedOneFrameRawData = true;
         }
         // WILLIAM END
@@ -1865,10 +1865,10 @@ public:
             // WILLIAM BEGIN
             if (savedOneFrameRawData){
                 std::ofstream outfile;
-                outfile.open("/home/william/catkin_ws/src/LeGO-LOAM/data/oneFrameRawData_3");
+                outfile.open("/home/william/data/LeGO-LOAM/oneFrameRawData_3");
                 outfile << laserCloudCornerLast2 << std::endl;
                 outfile.close();
-                pcl::io::savePCDFile("/home/william/catkin_ws/src/LeGO-LOAM/data/oneFrameRawData_3.pcd", *laserCloudCornerLast, false);
+                pcl::io::savePCDFile("/home/william/data/LeGO-LOAM/oneFrameRawData_3.pcd", *laserCloudCornerLast, false);
                 // savedOneFrameRawData = true;
             }
             // WILLIAM END

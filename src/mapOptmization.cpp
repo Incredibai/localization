@@ -684,10 +684,10 @@ public:
         // WILLIAM BEGIN
         if (!savedOneFrameRawData){
             std::ofstream outfile;
-            outfile.open("/home/william/catkin_ws/src/LeGO-LOAM/data/oneFrameRawData_4");
+            outfile.open("/home/william/data/LeGO-LOAM/oneFrameRawData_4");
             outfile << *msg << std::endl;
             outfile.close();
-            pcl::io::savePCDFile("/home/william/catkin_ws/src/LeGO-LOAM/data/oneFrameRawData_4.pcd", *laserCloudCornerLast, false);
+            pcl::io::savePCDFile("/home/william/data/LeGO-LOAM/oneFrameRawData_4.pcd", *laserCloudCornerLast, false);
             savedOneFrameRawData = true;            
         }
         // WILLIAM END
@@ -882,16 +882,16 @@ public:
         // WILLIAM END
 
         // WILLIAM BEGIN
-        saveMap.write("/home/william/catkin_ws/src/LeGO-LOAM/data/temp/savedMap.pcd", *globalMapKeyFrames);
+        saveMap.write("/home/william/data/LeGO-LOAM/temp/savedMap.pcd", *globalMapKeyFrames);
 
-        pcl::io::savePCDFile("/home/william/catkin_ws/src/LeGO-LOAM/data/temp/PCD_corner_DS.pcd", *globalMapCornerCloudDS, false);
-        pcl::io::savePCDFile("/home/william/catkin_ws/src/LeGO-LOAM/data/temp/PCD_surf_DS.pcd", *globalMapSurfCloudDS, false);
+        pcl::io::savePCDFile("/home/william/data/LeGO-LOAM/temp/PCD_corner_DS.pcd", *globalMapCornerCloudDS, false);
+        pcl::io::savePCDFile("/home/william/data/LeGO-LOAM/temp/PCD_surf_DS.pcd", *globalMapSurfCloudDS, false);
 
-        pcl::io::savePCDFile("/home/william/catkin_ws/src/LeGO-LOAM/data/temp/PCD_corner.pcd", *globalMapCornerCloud, false);
-        pcl::io::savePCDFile("/home/william/catkin_ws/src/LeGO-LOAM/data/temp/PCD_surf.pcd", *globalMapSurfCloud, false);
+        pcl::io::savePCDFile("/home/william/data/LeGO-LOAM/temp/PCD_corner.pcd", *globalMapCornerCloud, false);
+        pcl::io::savePCDFile("/home/william/data/LeGO-LOAM/temp/PCD_surf.pcd", *globalMapSurfCloud, false);
 
-        pcl::io::savePCDFile("/home/william/catkin_ws/src/LeGO-LOAM/data/temp/PCD_all_DS.pcd", *globalMapKeyFramesDS, false);
-        pcl::io::savePCDFile("/home/william/catkin_ws/src/LeGO-LOAM/data/temp/PCD_all.pcd", *globalMapKeyFrames, false);
+        pcl::io::savePCDFile("/home/william/data/LeGO-LOAM/temp/PCD_all_DS.pcd", *globalMapKeyFramesDS, false);
+        pcl::io::savePCDFile("/home/william/data/LeGO-LOAM/temp/PCD_all.pcd", *globalMapKeyFrames, false);
 
 
         globalMapKeyPoses->clear();

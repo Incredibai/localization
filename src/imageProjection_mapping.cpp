@@ -203,10 +203,10 @@ public:
         // WILLIAM BEGIN
         if (!savedOneFrameRawData){
             std::ofstream outfile;
-            outfile.open("/home/william/catkin_ws/src/LeGO-LOAM/data/oneFrameRawData_1");
+            outfile.open("/home/william/data/LeGO-LOAM/oneFrameRawData_1");
             outfile << *laserCloudIn << std::endl;
             outfile.close();
-            pcl::io::savePCDFile("/home/william/catkin_ws/src/LeGO-LOAM/data/oneFrameRawData_1.pcd", *laserCloudIn, false);
+            pcl::io::savePCDFile("/home/william/data/LeGO-LOAM/oneFrameRawData_1.pcd", *laserCloudIn, false);
             savedOneFrameRawData = true;            
         }
         // WILLIAM END

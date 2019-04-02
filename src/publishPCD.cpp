@@ -16,8 +16,8 @@ int main(int argc, char **argv) {
 
     pcl::PCLPointCloud2::Ptr cloud2_Corner(new pcl::PCLPointCloud2); 
     pcl::PCLPointCloud2::Ptr cloud2_Surf(new pcl::PCLPointCloud2); 
-    pcl::io::loadPCDFile ("/home/william/catkin_ws/src/LeGO-LOAM/data/saved/cornerMap.pcd", *cloud2_Corner);
-    pcl::io::loadPCDFile ("/home/william/catkin_ws/src/LeGO-LOAM/data/saved/surfMap.pcd", *cloud2_Surf);
+    pcl::io::loadPCDFile ("/home/william/data/LeGO-LOAM/saved/cornerMap.pcd", *cloud2_Corner);
+    pcl::io::loadPCDFile ("/home/william/data/LeGO-LOAM/saved/surfMap.pcd", *cloud2_Surf);
     // Convert to ROS data type
     sensor_msgs::PointCloud2 output_Corner;
     sensor_msgs::PointCloud2 output_Surf;

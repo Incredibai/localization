@@ -1,0 +1,5 @@
+source catkin_ws/devel/setup.bash
+cd /home/william/catkin_ws/src/LeGO-LOAM/launch
+sudo chmod +x localizationInMap.sh
+
+./localizationInMap.sh

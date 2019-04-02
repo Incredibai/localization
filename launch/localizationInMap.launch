@@ -19,5 +19,5 @@
     <node pkg="lego_loam" type="transformFusion"    name="transformFusion"    output="screen"/>
 
     <node pkg="lego_loam" type="publishPCD"         name="publishPCD"         output="screen" launch-prefix="gnome-terminal -e"/>  
-    <!--- git test -->
+    
 </launch>

@@ -1792,6 +1792,7 @@ public:
                 clearCloud();
 
                 // WILLIAM BEGIN
+                /*
                 // std::cout << "laserCloudCornerFromMapDSNum = " << laserCloudCornerFromMapDSNum << std::endl;
                 std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
                 std::cout << "-----------------------------------------------------------------------" << std::endl;
@@ -1831,6 +1832,8 @@ public:
                 std::cout << "Surf + Outlier Points Quantity = " << laserCloudSurfTotalLastDSNum << std::endl;
                 std::cout << "Current Frame Points Quantity = " << laserCloudCornerLastDSNum + laserCloudSurfTotalLastDSNum << std::endl;
                 std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+                */
+                // WILLIAM END               
             }
         }
     }

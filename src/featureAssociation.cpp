@@ -75,6 +75,7 @@ private:
     // WILLIAM BEGIN
     float VAR_INTENSITY = 20000000;
     bool savedOneFrameRawData = false;
+    int printCount = 0;
 
     cloud_msgs::cloud_info segInfo;
     std_msgs::Header cloudHeader;
@@ -1183,6 +1184,101 @@ public:
         }
     }
 
+    void showFeaturePointsIntensityDistribution(){
+
+        int cornerPointsSharpIntensityDistr[256] = {0};
+        int cornerPointsLessSharpIntensityDistr[256] = {0};
+        int surfPointsFlatIntensityDistr[256] = {0};
+        int surfPointsLessFlatIntensityDistr[256] = {0};
+        int cornerPointsSharpNum = cornerPointsSharp->points.size();
+        int cornerPointsLessSharpNum = cornerPointsLessSharp->points.size();
+        int surfPointsFlatNum = surfPointsFlat->points.size();
+        int surfPointsLessFlatNum = surfPointsLessFlat->points.size();
+        int j;
+        for (int i = 0; i < cornerPointsSharpNum; i++) {
+            cornerPointsSharpIntensityDistr[ int(cornerPointsSharp->points[i].curvature)]++;
+        }
+        for (int i = 0; i < cornerPointsLessSharpNum; i++) {
+            cornerPointsLessSharpIntensityDistr[int(cornerPointsLessSharp->points[i].curvature)]++;
+        }
+        for (int i = 0; i < surfPointsFlatNum; i++) {
+            surfPointsFlatIntensityDistr[int(surfPointsFlat->points[i].curvature)]++;
+        }
+        for (int i = 0; i < surfPointsLessFlatNum; i++) {
+            surfPointsLessFlatIntensityDistr[int(surfPointsLessFlat->points[i].curvature)]++;
+        }
+
+        std::cout << std::endl;
+        std::cout << "----" << std::endl;
+        std::cout << "Corner Points Sharp Intensity Distribution" << std::endl;
+        std::cout << "Total: " << cornerPointsSharpNum << std::endl;
+        std::cout << std::endl;
+        j = 0;        
+        for (int i = 0; i < 256; i++){
+            if(cornerPointsSharpIntensityDistr[i] != 0){
+                std::cout << "I[" << i << "]: " << cornerPointsSharpIntensityDistr[i] << " ";
+                j++;
+                if(j % 16 == 0) 
+                    std::cout << std::endl << std::endl;
+            }
+        }
+        if(j % 16 != 0)
+            std::cout << std::endl << std::endl;
+        std::cout << "Not Zero: " << j << std::endl;
+
+        std::cout << std::endl;
+        std::cout << "Corner Points Less Sharp Intensity Distribution" << std::endl;
+        std::cout << "Total: " << cornerPointsLessSharpNum << std::endl;
+        std::cout << std::endl;
+        j = 0;
+        for (int i = 0; i < 256; i++){
+            if(cornerPointsLessSharpIntensityDistr[i] != 0){
+                std::cout << "I[" << i << "]: " << cornerPointsLessSharpIntensityDistr[i] << " ";
+                j++;
+                if(j % 16 == 0)
+                    std::cout << std::endl << std::endl;
+            }
+        }
+        if(j % 16 != 0)
+            std::cout << std::endl << std::endl;
+        std::cout << "Not Zero: " << j << std::endl;
+
+        std::cout << std::endl;
+        std::cout << "Surf Points Flat Intensity Distribution" << std::endl;
+        std::cout << "Total: " << surfPointsFlatNum << std::endl;
+        std::cout << std::endl;
+        j = 0;        
+        for (int i = 0; i < 256; i++){
+            if(surfPointsFlatIntensityDistr[i] != 0){
+                std::cout << "I[" << i << "]: " << surfPointsFlatIntensityDistr[i] << " ";
+                j++;
+                if(j % 16 == 0)
+                    std::cout << std::endl << std::endl;
+            }
+        }
+        if(j % 16 != 0)
+            std::cout << std::endl << std::endl;
+        std::cout << "Not Zero: " << j << std::endl;
+
+        std::cout << std::endl;
+        std::cout << "Surf Points Less Flat Intensity Distribution" << std::endl;
+        std::cout << "Total: " << surfPointsLessFlatNum << std::endl;
+        std::cout << std::endl;
+        j = 0;
+        for (int i = 0; i < 256; i++){
+            if(surfPointsLessFlatIntensityDistr[i] != 0){
+                std::cout << "I[" << i << "]: " << surfPointsLessFlatIntensityDistr[i] << " ";
+                j++;
+                if(j % 16 == 0)
+                    std::cout << std::endl << std::endl;
+            }
+        }
+        if(j % 16 != 0)
+            std::cout << std::endl << std::endl;
+        std::cout << "Not Zero: " << j << std::endl;
+        std::cout << std::endl;
+    }
+
     void findCorrespondingSurfFeatures(int iterCount){
 
         int surfPointsFlatNum = surfPointsFlat->points.size();
@@ -1805,6 +1901,7 @@ public:
             point.y = outlierCloud->points[i].z;
             point.z = outlierCloud->points[i].x;
             point.intensity = outlierCloud->points[i].intensity;
+            point.curvature = outlierCloud->points[i].curvature;
             outlierCloud->points[i] = point;
         }
     }
@@ -1915,6 +2012,11 @@ public:
         extractFeatures();
 
         publishCloud();
+
+        if (printCount % 1 == 0){
+            showFeaturePointsIntensityDistribution();
+        }
+        printCount++;
 
         if (!systemInitedLM) {
             checkSystemInitialization();

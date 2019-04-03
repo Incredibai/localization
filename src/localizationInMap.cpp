@@ -1624,7 +1624,7 @@ public:
                 deltaPositionVectorZ_Avrg = (deltaPositionVectorZ_Avrg*(count_Avrg-1) + deltaPositionVectorZ)/count_Avrg;
 
                 // WILLIAM BEGIN
-                
+                /*
                 std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
                 std::cout << "-----------------------------------------------------------------------" << std::endl;
                 std::cout << "------------- You are running localization in map version -------------" << std::endl;
@@ -1710,7 +1710,7 @@ public:
                 std::cout << "Average Nearest K Surf Search Duration = " << nearestKSearchSurfDuration_Avrg*1000 << std::endl;
                 std::cout << "Average Map Optimization Duration = " << mapOptimizationDuration_Avrg*1000 << std::endl;
                 std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;      
-                
+                */
                 // WILLIAM END
 
                 //WILLIAM BEGIN

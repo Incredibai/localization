@@ -278,7 +278,8 @@ public:
             rangeMat.at<float>(rowIdn, columnIdn) = range;
 
             //why????????????
-            thisPoint.intensity = (float)rowIdn + (float)columnIdn / 10000.0;
+            thisPoint.intensity = (float)rowIdn + (float)columnIdn / 10000.0; // intensity here is calculated above
+
 
             index = columnIdn  + rowIdn * Horizon_SCAN;
             fullCloud->points[index] = thisPoint;

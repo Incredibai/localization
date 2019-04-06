@@ -1,6 +1,6 @@
 #!/bin/bash
 roslaunch localizationInMap.launch & 
-sleep 20
+sleep 12
 echo "localizationInMap started success!" 
 roslaunch velodynePointsPublish.launch & 
 sleep 0.1 

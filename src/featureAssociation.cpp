@@ -2014,7 +2014,7 @@ public:
         publishCloud();
 
         if (printCount % 1 == 0){
-            showFeaturePointsIntensityDistribution();
+            // showFeaturePointsIntensityDistribution();
         }
         printCount++;
 

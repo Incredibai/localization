@@ -210,26 +210,42 @@ private:
     bool newLaserCloudCornerMap = false;
     bool newLaserCloudSurfMap = false;
     bool getMap = false;
+
     double radiusSearchCornerTime_1;
     double radiusSearchCornerTime_2;
     double radiusSearchCornerDuration;
+
     double radiusSearchSurfTime_1;
     double radiusSearchSurfTime_2;
     double radiusSearchSurfDuration;
-    double nearestKSearchCornerTime_1;
-    double nearestKSearchCornerTime_2;
-    double nearestKSearchCornerDuration;
-    double nearestKSearchSurfTime_1;
-    double nearestKSearchSurfTime_2;
-    double nearestKSearchSurfDuration;
+
+    double cornerOptimizationTime_1;
+    double cornerOptimizationTime_2;
+    double cornerOptimizationTime_3;
+    double cornerOptimizationSearchDuration;
+    double cornerOptimizationSearchDuration_Avrg = 0;
+    double cornerOptimizationCalculateDuration;
+    double cornerOptimizationCalculateDuration_Avrg;
+    double radiusSearchCornerDuration_Avrg = 0;
+
+    double surfOptimizationTime_1;
+    double surfOptimizationTime_2;
+    double surfOptimizationTime_3;
+    double surfOptimizationSearchDuration;
+    double surfOptimizationSearchDuration_Avrg = 0;
+    double surfOptimizationCalculateDuration;
+    double surfOptimizationCalculateDuration_Avrg;
+    double radiusSearchSurfDuration_Avrg = 0;
+
+    double LMOptimizationTime_1;
+    double LMOptimizationTime_2;
+    double LMOptimizationDuration;
+
     double mapOptimizationTime_1;
     double mapOptimizationTime_2;
     double mapOptimizationDuration;
-    double radiusSearchCornerDuration_Avrg = 0;
-    double radiusSearchSurfDuration_Avrg = 0;
-    double nearestKSearchCornerDuration_Avrg = 0;
-    double nearestKSearchSurfDuration_Avrg = 0;
     double mapOptimizationDuration_Avrg = 0;
+
     double deltaPositionVectorX = 0;
     double deltaPositionVectorY = 0;
     double deltaPositionVectorZ = 0;
@@ -1100,14 +1116,19 @@ public:
     void cornerOptimization(int iterCount){
 
         updatePointAssociateToMapSinCos();
+
+        cornerOptimizationSearchDuration_Avrg = 0;
+        cornerOptimizationCalculateDuration_Avrg = 0;
+
         for (int i = 0; i < laserCloudCornerLastDSNum; i++) {
             pointOri = laserCloudCornerLastDS->points[i];
             pointAssociateToMap(&pointOri, &pointSel);
 
-            nearestKSearchCornerTime_1 = ros::Time::now().toSec();
+            cornerOptimizationTime_1 = ros::Time::now().toSec();
             kdtreeCornerFromMap->nearestKSearch(pointSel, 5, pointSearchInd, pointSearchSqDis);
-            nearestKSearchCornerTime_2 = ros::Time::now().toSec();
-            nearestKSearchCornerDuration = nearestKSearchCornerTime_2 - nearestKSearchCornerTime_1;
+            cornerOptimizationTime_2 = ros::Time::now().toSec();
+            cornerOptimizationSearchDuration = cornerOptimizationTime_2 - cornerOptimizationTime_1;
+            cornerOptimizationSearchDuration_Avrg += cornerOptimizationSearchDuration;
 
             if (pointSearchSqDis[4] < 1.0) {
 
@@ -1196,19 +1217,39 @@ public:
                     }
                 }
             }
+
+            cornerOptimizationTime_3 = ros::Time::now().toSec();
+            cornerOptimizationCalculateDuration = cornerOptimizationTime_3 - cornerOptimizationTime_2;
+            cornerOptimizationCalculateDuration_Avrg += cornerOptimizationCalculateDuration;
         }
+
+    cornerOptimizationSearchDuration_Avrg /= laserCloudCornerLastDSNum;
+    cornerOptimizationCalculateDuration_Avrg /= laserCloudCornerLastDSNum;
+    std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+    std::cout << "---------------------- Corner Opt Time (ms) ---------------------------" << std::endl;
+    std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+    std::cout << "interCount = " << iterCount << std::endl;
+    std::cout << "laserCloudCornerLastDSNum = " << laserCloudCornerLastDSNum << std::endl;
+    std::cout << "Average Nearest K Corner Search Duration = " << cornerOptimizationSearchDuration_Avrg*1000 << std::endl;
+    std::cout << "Average Calculation Duration = " << cornerOptimizationCalculateDuration_Avrg*1000 << std::endl;
+
     }
 
     void surfOptimization(int iterCount){
         updatePointAssociateToMapSinCos();
+
+        surfOptimizationSearchDuration_Avrg = 0;
+        surfOptimizationCalculateDuration_Avrg = 0;
+
         for (int i = 0; i < laserCloudSurfTotalLastDSNum; i++) {
             pointOri = laserCloudSurfTotalLastDS->points[i];
             pointAssociateToMap(&pointOri, &pointSel); 
 
-            nearestKSearchSurfTime_1 = ros::Time::now().toSec();
+            surfOptimizationTime_1 = ros::Time::now().toSec();
             kdtreeSurfFromMap->nearestKSearch(pointSel, 5, pointSearchInd, pointSearchSqDis);
-            nearestKSearchSurfTime_2 = ros::Time::now().toSec();
-            nearestKSearchSurfDuration = nearestKSearchSurfTime_2 - nearestKSearchSurfTime_1;
+            surfOptimizationTime_2 = ros::Time::now().toSec();
+            surfOptimizationSearchDuration = surfOptimizationTime_2 - surfOptimizationTime_1;
+            surfOptimizationSearchDuration_Avrg += surfOptimizationSearchDuration;
 
             if (pointSearchSqDis[4] < 1.0) {
 
@@ -1267,7 +1308,21 @@ public:
                     }
                 }
             }
+
+        surfOptimizationTime_3 = ros::Time::now().toSec();
+        surfOptimizationCalculateDuration = surfOptimizationTime_3 - surfOptimizationTime_2;
+        surfOptimizationCalculateDuration_Avrg += surfOptimizationCalculateDuration;
         }
+
+    surfOptimizationSearchDuration_Avrg /= laserCloudSurfTotalLastDSNum;
+    surfOptimizationCalculateDuration_Avrg /= laserCloudSurfTotalLastDSNum;
+    std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+    std::cout << "------------------------ Surf Opt Time (ms) ---------------------------" << std::endl;
+    std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+    std::cout << "interCount = " << iterCount << std::endl;
+    std::cout << "laserCloudSurfLastDSNum = " << laserCloudSurfLastDSNum << std::endl;
+    std::cout << "Average Nearest K Surf Search Duration = " << surfOptimizationSearchDuration_Avrg*1000 << std::endl;
+    std::cout << "Average Calculation Duration = " << surfOptimizationCalculateDuration_Avrg*1000 << std::endl;
     }
 
     bool LMOptimization(int iterCount){
@@ -1289,7 +1344,10 @@ public:
         cv::Mat matB(laserCloudSelNum, 1, CV_32F, cv::Scalar::all(0));
         cv::Mat matAtB(6, 1, CV_32F, cv::Scalar::all(0));
         cv::Mat matX(6, 1, CV_32F, cv::Scalar::all(0));
-        for (int i = 0; i < laserCloudSelNum; i++) {
+
+        LMOptimizationDuration = 0;
+        LMOptimizationTime_1 = ros::Time::now().toSec();
+        for (int i = 0; i < laserCloudSelNum; i++) { // calculate cost matrix
             pointOri = laserCloudOri->points[i];
             coeff = coeffSel->points[i];
 
@@ -1365,8 +1423,22 @@ public:
                             pow(matX.at<float>(5, 0) * 100, 2));
 
         if (deltaR < 0.05 && deltaT < 0.05) {
+            LMOptimizationTime_2 = ros::Time::now().toSec();
+            LMOptimizationDuration = LMOptimizationTime_2 - LMOptimizationTime_1;
+            std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+            std::cout << "------------------------- LM Opt Time (ms) ----------------------------" << std::endl;
+            std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+            std::cout << "interCount = " << iterCount << std::endl;
+            std::cout << "LM Opt Duration = " << LMOptimizationDuration*1000 << std::endl;
             return true;
         }
+        LMOptimizationTime_2 = ros::Time::now().toSec();
+        LMOptimizationDuration = LMOptimizationTime_2 - LMOptimizationTime_1;
+        std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+        std::cout << "------------------------- LM Opt Time (ms) ----------------------------" << std::endl;
+        std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+        std::cout << "interCount = " << iterCount << std::endl;
+        std::cout << "LM Opt Duration = " << LMOptimizationDuration*1000 << std::endl;
         return false;
     }
 
@@ -1392,10 +1464,25 @@ public:
         radiusSearchSurfTime_2 = ros::Time::now().toSec();
         radiusSearchSurfDuration = radiusSearchSurfTime_2 - radiusSearchSurfTime_1;
 
+        std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+        std::cout << "----------------------- Radius Search Time (ms) -----------------------" << std::endl;
+        std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+        std::cout << "radiusSearchCornerDuration = " << radiusSearchCornerDuration*1000 << std::endl;
+        std::cout << "radiusSearchSurfDuration = " << radiusSearchSurfDuration*1000 << std::endl;
+
+        radiusSearchCornerTime_1 = ros::Time::now().toSec(); // 借用一下上面的变量
+        
         for (int i = 0; i < pointSearchIndCornerMap.size(); ++i)
           laserCloudCornerFromMap->points.push_back(laserCloudCornerMap->points[pointSearchIndCornerMap[i]]);
         for (int i = 0; i < pointSearchIndSurfMap.size(); ++i)
           laserCloudSurfFromMap->points.push_back(laserCloudSurfMap->points[pointSearchIndSurfMap[i]]);
+
+        radiusSearchCornerTime_2 = ros::Time::now().toSec();
+        radiusSearchCornerDuration = radiusSearchCornerTime_2 - radiusSearchCornerTime_1;
+        std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+        std::cout << "--------------------- Load Point Cloud Time (ms) ----------------------" << std::endl;
+        std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+        std::cout << "Load Searched Point Cloud Time = " << radiusSearchCornerDuration*1000 << std::endl;
 
         *laserCloudCornerFromMapDS = *laserCloudCornerFromMap;
         *laserCloudSurfFromMapDS = *laserCloudSurfFromMap;
@@ -1411,6 +1498,7 @@ public:
             kdtreeCornerFromMap->setInputCloud(laserCloudCornerFromMapDS);
             kdtreeSurfFromMap->setInputCloud(laserCloudSurfFromMapDS);
 
+            mapOptimizationTime_1 = ros::Time::now().toSec();
             for (int iterCount = 0; iterCount < 10; iterCount++) {
 
                 laserCloudOri->clear();
@@ -1422,6 +1510,14 @@ public:
                 if (LMOptimization(iterCount) == true)
                     break;              
             }
+            mapOptimizationTime_2 = ros::Time::now().toSec();
+            mapOptimizationDuration = mapOptimizationTime_2 - mapOptimizationTime_1;
+            /*
+            std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+            std::cout << "--------------------- Scan To Map Opt Time (ms) -----------------------" << std::endl;
+            std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+            std::cout << "Scan To Map Opt Duration = " << mapOptimizationDuration*1000 << std::endl << std:: endl;
+            */
 
             transformUpdate();
         }
@@ -1597,10 +1693,15 @@ public:
 
                 downsampleCurrentScan();
 
+                std::cout << "--------------------------- One Period --------------------------------" << std::endl;
                 mapOptimizationTime_1 = ros::Time::now().toSec();
                 scan2MapOptimization();
                 mapOptimizationTime_2 = ros::Time::now().toSec();
                 mapOptimizationDuration = mapOptimizationTime_2 - mapOptimizationTime_1;
+                std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+                std::cout << "--------------------- Scan To Map Opt Time (ms) -----------------------" << std::endl;
+                std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+                std::cout << "Scan To Map Opt Duration = " << mapOptimizationDuration*1000 << std::endl << std:: endl;
 
                 saveKeyFramesAndFactor();
 
@@ -1613,8 +1714,8 @@ public:
                 count_Avrg++;
                 radiusSearchCornerDuration_Avrg = (radiusSearchCornerDuration_Avrg*(count_Avrg-1) + radiusSearchCornerDuration)/count_Avrg;
                 radiusSearchSurfDuration_Avrg = (radiusSearchSurfDuration_Avrg*(count_Avrg-1) + radiusSearchSurfDuration)/count_Avrg;
-                nearestKSearchCornerDuration_Avrg = (nearestKSearchCornerDuration_Avrg*(count_Avrg-1) + nearestKSearchCornerDuration)/count_Avrg;
-                nearestKSearchSurfDuration_Avrg = (nearestKSearchSurfDuration_Avrg*(count_Avrg-1) + nearestKSearchSurfDuration)/count_Avrg;
+                cornerOptimizationSearchDuration_Avrg = (cornerOptimizationSearchDuration_Avrg*(count_Avrg-1) + cornerOptimizationSearchDuration)/count_Avrg;
+                surfOptimizationSearchDuration_Avrg = (surfOptimizationSearchDuration_Avrg*(count_Avrg-1) + surfOptimizationSearchDuration)/count_Avrg;
                 mapOptimizationDuration_Avrg = (mapOptimizationDuration_Avrg*(count_Avrg-1) + mapOptimizationDuration)/count_Avrg;
                 deltaPositionVectorX = abs((currentRobotPosPoint.x - myPreviousRobotPosPoint.x) - (GPSPosition.pose.pose.position.x - sampledGPSPosition.pose.pose.position.x));
                 deltaPositionVectorY = abs((currentRobotPosPoint.y - myPreviousRobotPosPoint.y) - (GPSPosition.pose.pose.position.y - sampledGPSPosition.pose.pose.position.y));
@@ -1697,8 +1798,8 @@ public:
                 std::cout << "localizationProcessInterval = " << localizationProcessInterval*1000 << std::endl;                
                 std::cout << "Local Corner Map Radius Search Duration = " << radiusSearchCornerDuration*1000 << std::endl;
                 std::cout << "Local Surf Map Radius Search Duration = " << radiusSearchSurfDuration*1000 << std::endl;
-                std::cout << "Nearest K Corner Search Duration = " << nearestKSearchCornerDuration*1000 << std::endl;
-                std::cout << "Nearest K Surf Search Duration = " << nearestKSearchSurfDuration*1000 << std::endl;
+                std::cout << "Nearest K Corner Search Duration = " << cornerOptimizationSearchDuration*1000 << std::endl;
+                std::cout << "Nearest K Surf Search Duration = " << surfOptimizationSearchDuration*1000 << std::endl;
                 std::cout << "Map Optimization Duration = " << mapOptimizationDuration*1000 << std::endl;
                 std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
                 std::cout << "----------------- Average Time Durations (ms) -------------------------" << std::endl;
@@ -1706,8 +1807,8 @@ public:
                 std::cout << "count_Avrg = " << count_Avrg << endl;
                 std::cout << "Average Local Corner Map Radius Search Duration = " << radiusSearchCornerDuration_Avrg*1000 << std::endl;
                 std::cout << "Average Local Surf Map Radius Search Duration = " << radiusSearchSurfDuration_Avrg*1000 << std::endl;
-                std::cout << "Average Nearest K Corner Search Duration = " << nearestKSearchCornerDuration_Avrg*1000 << std::endl;
-                std::cout << "Average Nearest K Surf Search Duration = " << nearestKSearchSurfDuration_Avrg*1000 << std::endl;
+                std::cout << "Average Nearest K Corner Search Duration = " << cornerOptimizationSearchDuration_Avrg*1000 << std::endl;
+                std::cout << "Average Nearest K Surf Search Duration = " << surfOptimizationSearchDuration_Avrg*1000 << std::endl;
                 std::cout << "Average Map Optimization Duration = " << mapOptimizationDuration_Avrg*1000 << std::endl;
                 std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;      
                 */

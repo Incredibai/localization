@@ -47,31 +47,76 @@ link_directories(
 	${GTSAM_LIBRARY_DIRS}
 )
 
-add_executable(imageProjection_localization src/imageProjection_localization.cpp)
+# Localization
+add_executable(imageProjection_localization src/localization/imageProjection_localization.cpp)
 add_dependencies(imageProjection_localization ${catkin_EXPORTED_TARGETS} cloud_msgs_gencpp)
 target_link_libraries(imageProjection_localization ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
 
-add_executable(imageProjection_mapping src/imageProjection_mapping.cpp)
+add_executable(featureAssociation_localization src/localization/featureAssociation_localization.cpp)
+add_dependencies(featureAssociation_localization ${catkin_EXPORTED_TARGETS} cloud_msgs_gencpp)
+target_link_libraries(featureAssociation_localization ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(localizationInMap_localization src/localization/localizationInMap_localization.cpp)
+target_link_libraries(localizationInMap_localization ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} gtsam)
+
+add_executable(transformFusion_localization src/localization/transformFusion_localization.cpp)
+target_link_libraries(transformFusion_localization ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(publishPCD_localization src/localization/publishPCD_localization.cpp)
+target_link_libraries(publishPCD_localization ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+
+add_executable(tfListener_localization src/localization/transformListener_localization.cpp)
+target_link_libraries(tfListener_localization ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+
+# Mapping
+add_executable(imageProjection_mapping src/mapping/imageProjection_mapping.cpp)
 add_dependencies(imageProjection_mapping ${catkin_EXPORTED_TARGETS} cloud_msgs_gencpp)
 target_link_libraries(imageProjection_mapping ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
 
-add_executable(featureAssociation src/featureAssociation.cpp)
-add_dependencies(featureAssociation ${catkin_EXPORTED_TARGETS} cloud_msgs_gencpp)
-target_link_libraries(featureAssociation ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
+add_executable(featureAssociation_mapping src/mapping/featureAssociation_mapping.cpp)
+add_dependencies(featureAssociation_mapping ${catkin_EXPORTED_TARGETS} cloud_msgs_gencpp)
+target_link_libraries(featureAssociation_mapping ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
 
-add_executable(mapOptmization src/mapOptmization.cpp)
-target_link_libraries(mapOptmization ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} gtsam)
+add_executable(mapOptimization_mapping src/mapping/mapOptimization_mapping.cpp)
+target_link_libraries(mapOptimization_mapping ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} gtsam)
 
-add_executable(transformFusion src/transformFusion.cpp)
-target_link_libraries(transformFusion ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
+add_executable(transformFusion_mapping src/mapping/transformFusion_mapping.cpp)
+target_link_libraries(transformFusion_mapping ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
 
-# William Begin
-add_executable(publishPCD src/publishPCD.cpp)
-target_link_libraries(publishPCD ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+# KITTI
+# Localization
+add_executable(imageProjection_localization_K src/KITTI/localization/imageProjection_localization_K.cpp)
+add_dependencies(imageProjection_localization_K ${catkin_EXPORTED_TARGETS} cloud_msgs_gencpp)
+target_link_libraries(imageProjection_localization_K ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
 
-add_executable(localizationInMap src/localizationInMap.cpp)
-target_link_libraries(localizationInMap ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} gtsam)
+add_executable(featureAssociation_localization_K src/KITTI/localization/featureAssociation_localization_K.cpp)
+add_dependencies(featureAssociation_localization_K ${catkin_EXPORTED_TARGETS} cloud_msgs_gencpp)
+target_link_libraries(featureAssociation_localization_K ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
 
-add_executable(tfListener src/transformListener.cpp)
-target_link_libraries(tfListener ${catkin_LIBRARIES} ${PCL_LIBRARIES})
-# William End
+add_executable(localizationInMap_localization_K src/KITTI/localization/localizationInMap_localization_K.cpp)
+target_link_libraries(localizationInMap_localization_K ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} gtsam)
+
+add_executable(transformFusion_localization_K src/KITTI/localization/transformFusion_localization_K.cpp)
+target_link_libraries(transformFusion_localization_K ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(publishPCD_localization_K src/KITTI/localization/publishPCD_localization_K.cpp)
+target_link_libraries(publishPCD_localization_K ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+
+add_executable(tfListener_localization_K src/KITTI/localization/transformListener_localization_K.cpp)
+target_link_libraries(tfListener_localization_K ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+
+# Mapping
+add_executable(imageProjection_mapping_K src/KITTI/mapping/imageProjection_mapping_K.cpp)
+add_dependencies(imageProjection_mapping_K ${catkin_EXPORTED_TARGETS} cloud_msgs_gencpp)
+target_link_libraries(imageProjection_mapping_K ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(featureAssociation_mapping_K src/KITTI/mapping/featureAssociation_mapping_K.cpp)
+add_dependencies(featureAssociation_mapping_K ${catkin_EXPORTED_TARGETS} cloud_msgs_gencpp)
+target_link_libraries(featureAssociation_mapping_K ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(mapOptimization_mapping_K src/KITTI/mapping/mapOptimization_mapping_K.cpp)
+target_link_libraries(mapOptimization_mapping_K ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} gtsam)
+
+add_executable(transformFusion_mapping_K src/KITTI/mapping/transformFusion_mapping_K.cpp)
+target_link_libraries(transformFusion_mapping_K ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
+

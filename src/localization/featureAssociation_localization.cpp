@@ -825,47 +825,6 @@ public:
 	    }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     void TransformToStart(pcl::PointXYZINormal const * const pi, pcl::PointXYZINormal * const po)
     {
         float s = 10 * (pi->intensity - int(pi->intensity));

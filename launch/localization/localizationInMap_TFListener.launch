@@ -5,18 +5,18 @@
     <!---param name="/use_sim_time" value="true" /-->
 
     <!--- Run Rviz-->
-    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find lego_loam)/launch/localizationInMap.rviz" />
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find lego_loam)/launch/localization/localizationInMap.rviz" />
 
     <!--- TF -->
     <node pkg="tf" type="static_transform_publisher" name="camera_init_to_map"  args="0 0 0 1.570795   0        1.570795 /map    /camera_init 10" />
     <node pkg="tf" type="static_transform_publisher" name="base_link_to_camera" args="0 0 0 -1.570795 -1.570795 0        /camera /base_link   10" />
 
     <!--- LeGO-LOAM -->    
-    <node pkg="lego_loam" type="imageProjection"    name="imageProjection"    output="screen"/>
-    <node pkg="lego_loam" type="featureAssociation" name="featureAssociation" output="screen"/>
-    <node pkg="lego_loam" type="localizationInMap"  name="localizationInMap"  output="screen"/>
-    <node pkg="lego_loam" type="transformFusion"    name="transformFusion"    output="screen"/>
-    <node pkg="lego_loam" type="publishPCD"         name="publishPCD"         output="screen" launch-prefix="gnome-terminal -e"/>
+    <node pkg="lego_loam" type="imageProjection_localization"    name="imageProjection"    output="screen"/>
+    <node pkg="lego_loam" type="featureAssociation_localization" name="featureAssociation" output="screen"/>
+    <node pkg="lego_loam" type="localizationInMap_localization"  name="localizationInMap"  output="screen"/>
+    <node pkg="lego_loam" type="transformFusion_localization"    name="transformFusion"    output="screen"/>
+    <node pkg="lego_loam" type="publishPCD_localization"         name="publishPCD"         output="screen" launch-prefix="gnome-terminal -e"/>
     
     <!--- Velodyne Points Publish -->
     <!--- "gnome-terminal" means new terminal and "-e" means execute following commands -->
@@ -24,7 +24,7 @@
 
     <!--- TF Listener -->
     <!--- "gnome-terminal" means new terminal and "-e" means execute following commands -->
-    <node pkg="lego_loam" type="tfListener" name="tfListener" output="screen" launch-prefix="gnome-terminal -e"/>
+    <node pkg="lego_loam" type="tfListener_localization" name="tfListener" output="screen" launch-prefix="gnome-terminal -e"/>
     
 
 </launch>

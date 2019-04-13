@@ -51,13 +51,40 @@ using namespace std;
 
 typedef pcl::PointXYZI  PointType;
 
+// HDL32
+/*
 extern const int N_SCAN = 32;              //16
 extern const int Horizon_SCAN = 2172;      //1800;
 extern const float ang_res_x = 0.166;       //0.2
 extern const float ang_res_y = 1.33;       //2.0
 extern const float ang_bottom = 30.0+0.67;     //15.0+0.1;
 extern const int groundScanInd = 23;//16;       //7
+*/
 
+// HDL64E
+
+extern const int N_SCAN = 64;
+extern const int Horizon_SCAN = 1800;
+extern const float ang_res_x = 0.2;
+extern const float ang_res_y = 0.427;
+extern const float ang_bottom = 24.9;
+extern const int groundScanInd = 50;
+
+extern const bool loopClosureEnableFlag = true;
+extern const bool mappingDSFEnableFlag = true;
+extern const double mappingProcessInterval = 0.3;
+extern const double localizationProcessInterval = 0.3;
+extern const double localizationSearchRadius = 20;
+extern const double DSFCornerLeafSize = 0.2; // Each Frame 
+extern const double DSFSurfLeafSize = 0.4; // Each Frame
+extern const double DSFOutlierLeafSize = 0.4;
+extern const double DSFHistoryKeyFramesLeafSize = 0.4;
+extern const double DSFSurroundingKeyPosesLeafSize = 1.0;
+extern const double DSFGlobalMapKeyPosesLeafSize = 1.0;
+extern const double DSFGlobalMapKeyFramesLeafSize = 1.0;
+extern const double W_intensity = 0.0;
+
+/*
 extern const bool loopClosureEnableFlag = true;
 // WILLIAM BEGIN
 extern const bool mappingDSFEnableFlag = true;
@@ -73,6 +100,7 @@ extern const double DSFGlobalMapKeyPosesLeafSize = 1.0;
 extern const double DSFGlobalMapKeyFramesLeafSize = 1.0;
 extern const double W_intensity = 0.2;
 // WILLIAM END
+*/
 
 /*
         downSizeFilterCorner.setLeafSize(0.2, 0.2, 0.2);
@@ -96,7 +124,6 @@ extern const int segmentValidPointNum = 5;
 extern const int segmentValidLineNum = 3;
 extern const float segmentAlphaX = ang_res_x / 180.0 * M_PI;
 extern const float segmentAlphaY = ang_res_y / 180.0 * M_PI;
-
 
 extern const int edgeFeatureNum = 3;//2;
 extern const int surfFeatureNum = 5;//4;

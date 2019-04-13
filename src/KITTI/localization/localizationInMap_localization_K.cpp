@@ -43,7 +43,7 @@
 #include <gtsam/nonlinear/Values.h>
 // git test
 #include <gtsam/nonlinear/ISAM2.h>
-
+#include <std_msgs/Bool.h>
 using namespace gtsam;
 
 class mapOptimization{
@@ -87,6 +87,7 @@ private:
     nav_msgs::Odometry GPSPosition;
     nav_msgs::Odometry sampledGPSPosition;
     pcl::PointXYZI tempPoint;
+    ros::Publisher pubGetMapFlag;
     float yaw_init = 202.5;
     float VAR_INTENSITY = 100;
     // WILLIAM END
@@ -210,6 +211,7 @@ private:
     bool newLaserCloudCornerMap = false;
     bool newLaserCloudSurfMap = false;
     bool getMap = false;
+    std_msgs::Bool GetMapFlag;
 
     double radiusSearchCornerTime_1;
     double radiusSearchCornerTime_2;
@@ -345,6 +347,7 @@ public:
         pubRecentKeyFrames = nh.advertise<sensor_msgs::PointCloud2>("/recent_cloud", 2);
         pubGPSFrames = nh.advertise<sensor_msgs::PointCloud2>("/GPS_cloud", 2);
         pubGPSPosition = nh.advertise<nav_msgs::Odometry>("/GPSPosition", 1);
+        pubGetMapFlag = nh.advertise<std_msgs::Bool>("/GetMapFlag", 1);
 
 
         // downSizeFilterCorner.setLeafSize(0.2, 0.2, 0.2);
@@ -446,6 +449,7 @@ public:
         
         laserCloudCornerMap.reset(new pcl::PointCloud<pcl::PointXYZINormal>());
         laserCloudSurfMap.reset(new pcl::PointCloud<pcl::PointXYZINormal>());
+        GetMapFlag.data = false;
         // WILLIAM END
 
 
@@ -778,6 +782,8 @@ public:
         if(!getMap&&newLaserCloudCornerMap&&newLaserCloudSurfMap)
         {
             getMap = true;
+            GetMapFlag.data = true;
+            pubGetMapFlag.publish(GetMapFlag);
             std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
             std::cout << "-----------------------------------------------------------------------" << std::endl;
             std::cout << "------------- You are running localization in map version -------------" << std::endl;
@@ -1225,13 +1231,13 @@ public:
 
     cornerOptimizationSearchDuration_Avrg /= laserCloudCornerLastDSNum;
     cornerOptimizationCalculateDuration_Avrg /= laserCloudCornerLastDSNum;
-    std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
-    std::cout << "---------------------- Corner Opt Time (ms) ---------------------------" << std::endl;
-    std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
-    std::cout << "interCount = " << iterCount << std::endl;
-    std::cout << "laserCloudCornerLastDSNum = " << laserCloudCornerLastDSNum << std::endl;
-    std::cout << "Average Nearest K Corner Search Duration = " << cornerOptimizationSearchDuration_Avrg*1000 << std::endl;
-    std::cout << "Average Calculation Duration = " << cornerOptimizationCalculateDuration_Avrg*1000 << std::endl;
+    // std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+    // std::cout << "---------------------- Corner Opt Time (ms) ---------------------------" << std::endl;
+    // std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+    // std::cout << "interCount = " << iterCount << std::endl;
+    // std::cout << "laserCloudCornerLastDSNum = " << laserCloudCornerLastDSNum << std::endl;
+    // std::cout << "Average Nearest K Corner Search Duration = " << cornerOptimizationSearchDuration_Avrg*1000 << std::endl;
+    // std::cout << "Average Calculation Duration = " << cornerOptimizationCalculateDuration_Avrg*1000 << std::endl;
 
     }
 
@@ -1316,13 +1322,13 @@ public:
 
     surfOptimizationSearchDuration_Avrg /= laserCloudSurfTotalLastDSNum;
     surfOptimizationCalculateDuration_Avrg /= laserCloudSurfTotalLastDSNum;
-    std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
-    std::cout << "------------------------ Surf Opt Time (ms) ---------------------------" << std::endl;
-    std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
-    std::cout << "interCount = " << iterCount << std::endl;
-    std::cout << "laserCloudSurfLastDSNum = " << laserCloudSurfLastDSNum << std::endl;
-    std::cout << "Average Nearest K Surf Search Duration = " << surfOptimizationSearchDuration_Avrg*1000 << std::endl;
-    std::cout << "Average Calculation Duration = " << surfOptimizationCalculateDuration_Avrg*1000 << std::endl;
+    // std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+    // std::cout << "------------------------ Surf Opt Time (ms) ---------------------------" << std::endl;
+    // std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+    // std::cout << "interCount = " << iterCount << std::endl;
+    // std::cout << "laserCloudSurfLastDSNum = " << laserCloudSurfLastDSNum << std::endl;
+    // std::cout << "Average Nearest K Surf Search Duration = " << surfOptimizationSearchDuration_Avrg*1000 << std::endl;
+    // std::cout << "Average Calculation Duration = " << surfOptimizationCalculateDuration_Avrg*1000 << std::endl;
     }
 
     bool LMOptimization(int iterCount){
@@ -1425,20 +1431,20 @@ public:
         if (deltaR < 0.05 && deltaT < 0.05) {
             LMOptimizationTime_2 = ros::Time::now().toSec();
             LMOptimizationDuration = LMOptimizationTime_2 - LMOptimizationTime_1;
-            std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
-            std::cout << "------------------------- LM Opt Time (ms) ----------------------------" << std::endl;
-            std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
-            std::cout << "interCount = " << iterCount << std::endl;
-            std::cout << "LM Opt Duration = " << LMOptimizationDuration*1000 << std::endl;
+            // std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+            // std::cout << "------------------------- LM Opt Time (ms) ----------------------------" << std::endl;
+            // std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+            // std::cout << "interCount = " << iterCount << std::endl;
+            // std::cout << "LM Opt Duration = " << LMOptimizationDuration*1000 << std::endl;
             return true;
         }
         LMOptimizationTime_2 = ros::Time::now().toSec();
         LMOptimizationDuration = LMOptimizationTime_2 - LMOptimizationTime_1;
-        std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
-        std::cout << "------------------------- LM Opt Time (ms) ----------------------------" << std::endl;
-        std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
-        std::cout << "interCount = " << iterCount << std::endl;
-        std::cout << "LM Opt Duration = " << LMOptimizationDuration*1000 << std::endl;
+        // std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+        // std::cout << "------------------------- LM Opt Time (ms) ----------------------------" << std::endl;
+        // std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+        // std::cout << "interCount = " << iterCount << std::endl;
+        // std::cout << "LM Opt Duration = " << LMOptimizationDuration*1000 << std::endl;
         return false;
     }
 
@@ -1464,11 +1470,11 @@ public:
         radiusSearchSurfTime_2 = ros::Time::now().toSec();
         radiusSearchSurfDuration = radiusSearchSurfTime_2 - radiusSearchSurfTime_1;
 
-        std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
-        std::cout << "----------------------- Radius Search Time (ms) -----------------------" << std::endl;
-        std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
-        std::cout << "radiusSearchCornerDuration = " << radiusSearchCornerDuration*1000 << std::endl;
-        std::cout << "radiusSearchSurfDuration = " << radiusSearchSurfDuration*1000 << std::endl;
+        // std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+        // std::cout << "----------------------- Radius Search Time (ms) -----------------------" << std::endl;
+        // std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+        // std::cout << "radiusSearchCornerDuration = " << radiusSearchCornerDuration*1000 << std::endl;
+        // std::cout << "radiusSearchSurfDuration = " << radiusSearchSurfDuration*1000 << std::endl;
 
         radiusSearchCornerTime_1 = ros::Time::now().toSec(); // 借用一下上面的变量
         
@@ -1479,10 +1485,10 @@ public:
 
         radiusSearchCornerTime_2 = ros::Time::now().toSec();
         radiusSearchCornerDuration = radiusSearchCornerTime_2 - radiusSearchCornerTime_1;
-        std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
-        std::cout << "--------------------- Load Point Cloud Time (ms) ----------------------" << std::endl;
-        std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
-        std::cout << "Load Searched Point Cloud Time = " << radiusSearchCornerDuration*1000 << std::endl;
+        // std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+        // std::cout << "--------------------- Load Point Cloud Time (ms) ----------------------" << std::endl;
+        // std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+        // std::cout << "Load Searched Point Cloud Time = " << radiusSearchCornerDuration*1000 << std::endl;
 
         *laserCloudCornerFromMapDS = *laserCloudCornerFromMap;
         *laserCloudSurfFromMapDS = *laserCloudSurfFromMap;
@@ -1725,6 +1731,7 @@ public:
                 deltaPositionVectorZ_Avrg = (deltaPositionVectorZ_Avrg*(count_Avrg-1) + deltaPositionVectorZ)/count_Avrg;
 
                 // WILLIAM BEGIN
+
                 /*
                 std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
                 std::cout << "-----------------------------------------------------------------------" << std::endl;
@@ -1812,6 +1819,7 @@ public:
                 std::cout << "Average Map Optimization Duration = " << mapOptimizationDuration_Avrg*1000 << std::endl;
                 std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;      
                 */
+               
                 // WILLIAM END
 
                 //WILLIAM BEGIN

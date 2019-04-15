@@ -38,7 +38,14 @@ include_directories(
 	${PCL_INCLUDE_DIRS}
 	${OpenCV_INCLUDE_DIRS}
 	${GTSAM_INCLUDE_DIR}
+	/home/william/catkin_ws/src/LeGO-LOAM/include
 )
+
+# add_library(matrix_K
+  # include/matrix.h src/KITTI/localization/matrix_K.cpp)
+
+# target_link_libraries(matrix_K ${catkin_LIBRARIES})
+# add_dependencies(matrix_K ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 link_directories(
 	include
@@ -97,7 +104,7 @@ add_executable(localizationInMap_localization_K src/KITTI/localization/localizat
 target_link_libraries(localizationInMap_localization_K ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} gtsam)
 
 add_executable(transformFusion_localization_K src/KITTI/localization/transformFusion_localization_K.cpp)
-target_link_libraries(transformFusion_localization_K ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
+target_link_libraries(transformFusion_localization_K ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} matrix)
 
 add_executable(publishPCD_localization_K src/KITTI/localization/publishPCD_localization_K.cpp)
 target_link_libraries(publishPCD_localization_K ${catkin_LIBRARIES} ${PCL_LIBRARIES})
@@ -118,5 +125,5 @@ add_executable(mapOptimization_mapping_K src/KITTI/mapping/mapOptimization_mappi
 target_link_libraries(mapOptimization_mapping_K ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} gtsam)
 
 add_executable(transformFusion_mapping_K src/KITTI/mapping/transformFusion_mapping_K.cpp)
-target_link_libraries(transformFusion_mapping_K ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
+target_link_libraries(transformFusion_mapping_K ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} matrix)
 

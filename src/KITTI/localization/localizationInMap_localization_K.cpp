@@ -1707,7 +1707,7 @@ public:
                 std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
                 std::cout << "--------------------- Scan To Map Opt Time (ms) -----------------------" << std::endl;
                 std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
-                std::cout << "Scan To Map Opt Duration = " << mapOptimizationDuration*1000 << std::endl << std:: endl;
+                std::cout << "Scan To Map Opt Duration = " << mapOptimizationDuration*1000 << std::endl << std::endl;
 
                 saveKeyFramesAndFactor();
 

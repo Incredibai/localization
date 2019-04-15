@@ -15,7 +15,7 @@
     <node pkg="lego_loam" type="imageProjection_mapping_K"    name="imageProjection"    output="screen"/>
     <node pkg="lego_loam" type="featureAssociation_mapping_K" name="featureAssociation" output="screen"/>
     <node pkg="lego_loam" type="mapOptimization_mapping_K"     name="mapOptmization"     output="screen"/>
-    <node pkg="lego_loam" type="transformFusion_mapping_K"    name="transformFusion"    output="screen"/>
+    <node pkg="lego_loam" type="transformFusion_mapping_K"    name="transformFusion"    output="screen" launch-prefix="gnome-terminal -e"/>
     
     <!--- KITTI Velodyne Points Publish -->
     <!--- "gnome-terminal" means new terminal and "-e" means execute following commands -->

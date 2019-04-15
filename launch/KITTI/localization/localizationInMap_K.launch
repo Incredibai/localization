@@ -18,7 +18,7 @@
     <node pkg="lego_loam"    type="imageProjection_localization_K"          name="imageProjection"         output="screen"/>
     <node pkg="lego_loam"    type="featureAssociation_localization_K"       name="featureAssociation"      output="screen"/>
     <node pkg="lego_loam"    type="localizationInMap_localization_K"        name="localizationInMap"       output="screen"/>
-    <node pkg="lego_loam"    type="transformFusion_localization_K"          name="transformFusion"         output="screen"/>
+    <node pkg="lego_loam"    type="transformFusion_localization_K"          name="transformFusion"         output="screen" launch-prefix="gnome-terminal -e"/>
 
 
     

@@ -76,6 +76,7 @@ private:
     float VAR_INTENSITY = 20000000;
     bool savedOneFrameRawData = false;
     int printCount = 0;
+    double runTime1, runTime2;
 
     cloud_msgs::cloud_info segInfo;
     std_msgs::Header cloudHeader;
@@ -1982,6 +1983,8 @@ public:
             return;
         }
 
+        // runTime1 = ros::Time::now().toSec();
+
         // adjustDistortion();
         YZX2XYZ();
 
@@ -2008,6 +2011,9 @@ public:
         updateTransformation();
 
         integrateTransformation();
+
+        // runTime2 = ros::Time::now().toSec();
+        // std::cout << "Feature Association Duration = " << (runTime2 - runTime1)*1000 << std::endl;
 
         publishOdometry();
 

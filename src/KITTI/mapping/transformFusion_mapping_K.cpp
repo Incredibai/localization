@@ -33,6 +33,10 @@
 #include "utility.h"
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
+#include "matrix.h"
+#include <vector>
+
+std::ofstream outfile;
 
 class TransformFusion{
 
@@ -60,8 +64,13 @@ private:
     bool firstFlag = true;
     double timeLastSavedTF;
     double timeCurrentTF;
+    int count = 0;
+    nav_msgs::Odometry GPSPosition;
+    ros::Publisher pubGPSPosition;
 
-
+    double translationErrorVectorXSum = 0;
+    double translationErrorVectorYSum = 0;
+    double translationErrorVectorZSum = 0;
 
     tf::StampedTransform map_2_camera_init_Trans;
     tf::TransformBroadcaster tfBroadcasterMap2CameraInit;
@@ -74,8 +83,13 @@ private:
     float transformMapped[6];
     float transformBefMapped[6];
     float transformAftMapped[6];
+    float transformMappedLast[6];
 
     std_msgs::Header currentHeader;
+    
+    string gt_dir = "/home/william/data/KITTI/dataset/poses";
+    string file_name = "00.txt";
+    vector<Matrix> poses_gt = loadPoses(gt_dir + "/" + file_name);
 
 public:
 
@@ -84,6 +98,7 @@ public:
         pubLaserOdometry2 = nh.advertise<nav_msgs::Odometry> ("/integrated_to_init", 5);
         subLaserOdometry = nh.subscribe<nav_msgs::Odometry>("/laser_odom_to_init", 5, &TransformFusion::laserOdometryHandler, this);
         subOdomAftMapped = nh.subscribe<nav_msgs::Odometry>("/aft_mapped_to_init", 5, &TransformFusion::odomAftMappedHandler, this);
+        pubGPSPosition = nh.advertise<nav_msgs::Odometry>("/GPSPosition", 1);
 
         laserOdometry2.header.frame_id = "/camera_init";
         laserOdometry2.child_frame_id = "/camera";
@@ -103,6 +118,8 @@ public:
         camera_2_base_link_Trans.frame_id_ = "/camera";
         camera_2_base_link_Trans.child_frame_id_ = "/base_link";
 
+        GPSPosition.header.frame_id = "/camera_init";
+
         for (int i = 0; i < 6; ++i)
         {
             transformSum[i] = 0;
@@ -110,7 +127,9 @@ public:
             transformMapped[i] = 0;
             transformBefMapped[i] = 0;
             transformAftMapped[i] = 0;
+            transformMappedLast[i] = 0;
         }
+        
     }
 
     void transformAssociateToMap()
@@ -201,7 +220,7 @@ public:
     }
 
     void laserOdometryHandler(const nav_msgs::Odometry::ConstPtr& laserOdometry)
-    {
+    { 
         currentHeader = laserOdometry->header;
         // WILLIAM BEGIN
         // cout << "header: " << laserOdometry->header << "***********laserOdom Time: " << ros::Time::now() << endl;
@@ -293,10 +312,101 @@ std::cout << std::endl;
         laserOdometry2.pose.pose.position.z = transformMapped[5];
         pubLaserOdometry2.publish(laserOdometry2);
 
+        GPSPosition.header.stamp = laserOdometry->header.stamp;
+        GPSPosition.pose.pose.orientation.x = 0;
+        GPSPosition.pose.pose.orientation.y = 0;
+        GPSPosition.pose.pose.orientation.z = 0;
+        GPSPosition.pose.pose.orientation.w = 0;
+        GPSPosition.pose.pose.position.x = -poses_gt[count+2].val[0][3];
+        GPSPosition.pose.pose.position.y = poses_gt[count+2].val[1][3];
+        GPSPosition.pose.pose.position.z = poses_gt[count+2].val[2][3];
+        GPSPosition.twist.twist.angular.x = 0;
+        GPSPosition.twist.twist.angular.y = 0;
+        GPSPosition.twist.twist.angular.z = 0;
+        GPSPosition.twist.twist.linear.x = 0;
+        GPSPosition.twist.twist.linear.y = 0;
+        GPSPosition.twist.twist.linear.z = 0;
+        pubGPSPosition.publish(GPSPosition);
+
+        if(count == 0){
+            transformMappedLast[3] = transformMapped[3];
+            transformMappedLast[4] = transformMapped[4];
+            transformMappedLast[5] = transformMapped[5];
+        }
+        std::cout << "----------------------- transformFusion.cpp ---------------------------" << std::endl;
+        std::cout << "--------------------------- One Period --------------------------------" << std::endl;
+        std::cout << "frame " << count << ": " << std::endl;
+        std::cout << "header: " << laserOdometry2.header.stamp << std::endl;
+
+        outfile << "----------------------- transformFusion.cpp ---------------------------" << std::endl;
+        outfile << "--------------------------- One Period --------------------------------" << std::endl;
+        outfile << "frame " << count << ": " << std::endl;
+        outfile << "header: " << laserOdometry2.header.stamp << std::endl;   
+        // std::cout << "transformMapped[0] " << transformMapped[0] << std::endl;
+        // std::cout << "transformMapped[1] " << transformMapped[1] << std::endl;
+        // std::cout << "transformMapped[2] " << transformMapped[2] << std::endl;
+        // std::cout << "transformMapped[3] " << transformMapped[3] << std::endl;
+        // std::cout << "transformMapped[4] " << transformMapped[4] << std::endl;
+        // std::cout << "transformMapped[5] " << transformMapped[5] << std::endl;
+        if(count > 0){
+            translationErrorVectorXSum += abs((-transformMapped[3] - (-transformMappedLast[3])) - (poses_gt[count+2].val[0][3] - poses_gt[count+1].val[0][3]));
+            translationErrorVectorZSum += abs((transformMapped[5] - transformMappedLast[5]) - (poses_gt[count+2].val[2][3] - poses_gt[count+1].val[2][3]));
+        }
+        if(count > 0 && count < 500){
+            std::cout << "frame 0-500 ---->" << std::endl;
+            std::cout << "Translation Vector X Average Error: " << translationErrorVectorXSum/count << std::endl;
+            std::cout << "Translation Vector Z Average Error: " << translationErrorVectorZSum/count << std::endl;       
+            outfile << "frame 0-500 ---->" << std::endl;
+            outfile << "Translation Vector X Average Error: " << translationErrorVectorXSum/count << std::endl;
+            outfile << "Translation Vector Z Average Error: " << translationErrorVectorZSum/count << std::endl; 
+        }
+        if(count == 500){
+            translationErrorVectorXSum = 0;
+            translationErrorVectorZSum = 0;   
+        }
+        if(count > 500 && count < 1000){
+            std::cout << "frame 500-1000 ---->" << std::endl;
+            std::cout << "Translation Vector X Average Error: " << translationErrorVectorXSum/(count-500) << std::endl;
+            std::cout << "Translation Vector Z Average Error: " << translationErrorVectorZSum/(count-500) << std::endl;
+            outfile << "frame 500-1000 ---->" << std::endl;
+            outfile << "Translation Vector X Average Error: " << translationErrorVectorXSum/(count-500) << std::endl;
+            outfile << "Translation Vector Z Average Error: " << translationErrorVectorZSum/(count-500) << std::endl;      
+        }
+        if(count == 1000){
+            translationErrorVectorXSum = 0;
+            translationErrorVectorZSum = 0;   
+        }
+        if(count > 1000 && count < 2000){
+            std::cout << "frame 1000-2000 ---->" << std::endl;
+            std::cout << "Translation Vector X Average Error: " << translationErrorVectorXSum/(count-1000) << std::endl;
+            std::cout << "Translation Vector Z Average Error: " << translationErrorVectorZSum/(count-1000) << std::endl;
+            outfile << "frame 1000-2000 ---->" << std::endl;
+            outfile << "Translation Vector X Average Error: " << translationErrorVectorXSum/(count-1000) << std::endl;
+            outfile << "Translation Vector Z Average Error: " << translationErrorVectorZSum/(count-1000) << std::endl;     
+        }
+        if(count == 2000){
+            translationErrorVectorXSum = 0;
+            translationErrorVectorZSum = 0;   
+        }
+        if(count > 2000 && count < 4000){
+            std::cout << "frame 2000-4000 ---->" << std::endl;
+            std::cout << "Translation Vector X Average Error: " << translationErrorVectorXSum/(count-2000) << std::endl;
+            std::cout << "Translation Vector Z Average Error: " << translationErrorVectorZSum/(count-2000) << std::endl;
+            outfile << "frame 2000-4000 ---->" << std::endl;
+            outfile << "Translation Vector X Average Error: " << translationErrorVectorXSum/(count-2000) << std::endl;
+            outfile << "Translation Vector Z Average Error: " << translationErrorVectorZSum/(count-2000) << std::endl;     
+        }
+
+        count++;
+        transformMappedLast[3] = transformMapped[3];
+        transformMappedLast[4] = transformMapped[4];
+        transformMappedLast[5] = transformMapped[5];
+
         laserOdometryTrans2.stamp_ = laserOdometry->header.stamp;
         laserOdometryTrans2.setRotation(tf::Quaternion(-geoQuat.y, -geoQuat.z, geoQuat.x, geoQuat.w));
         laserOdometryTrans2.setOrigin(tf::Vector3(transformMapped[3], transformMapped[4], transformMapped[5]));
         tfBroadcaster2.sendTransform(laserOdometryTrans2);
+
     }
 
     void odomAftMappedHandler(const nav_msgs::Odometry::ConstPtr& odomAftMapped)
@@ -325,20 +435,40 @@ std::cout << std::endl;
         transformBefMapped[4] = odomAftMapped->twist.twist.linear.y;
         transformBefMapped[5] = odomAftMapped->twist.twist.linear.z;
     }
+
+    vector<Matrix> loadPoses(string file_name) {    
+        vector<Matrix> poses;
+        FILE *fp = fopen(file_name.c_str(),"r");
+        if (!fp)
+            return poses;
+        while (!feof(fp)) {
+            Matrix P = Matrix::eye(4);
+            if (fscanf(fp, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+                        &P.val[0][0], &P.val[0][1], &P.val[0][2], &P.val[0][3],
+                        &P.val[1][0], &P.val[1][1], &P.val[1][2], &P.val[1][3],
+                        &P.val[2][0], &P.val[2][1], &P.val[2][2], &P.val[2][3] )==12) {
+            poses.push_back(P);
+            }
+        }
+        fclose(fp);
+        return poses;
+    }
 };
-
-
 
 
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "lego_loam");
-    
+
+    outfile.open("/home/william/data/LeGO-LOAM/TranslationError");
+
     TransformFusion TFusion;
 
     ROS_INFO("\033[1;32m---->\033[0m Transform Fusion Started.");
 
     ros::spin();
 
+    outfile.close();
+    
     return 0;
 }

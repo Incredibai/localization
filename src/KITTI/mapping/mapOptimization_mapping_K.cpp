@@ -1817,22 +1817,20 @@ public:
                 << currentRobotPosPoint.y << ", " << currentRobotPosPoint.z << ")" << std::endl;
                 */
                 std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
-                std::cout << "---------------------- Time Durations (ms) ----------------------------" << std::endl;
-                std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+                std::cout << "--------------------------- One Period --------------------------------" << std::endl;
+                std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;                
+                std::cout << "----> header: " << timeLaserCloudCornerLast  << fixed << std::endl;
+                std::cout << "----> Time Durations (ms) " << std::endl;
                 std::cout << "Map Optimization Duration = " << mapOptimizationDuration*1000 << std::endl;
-                std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
-                std::cout << "------------------- Local Map Points Quantity -------------------------" << std::endl;
-                std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+                std::cout << "----> Local Map Points Quantity " << std::endl;
                 std::cout << "Corner Points Quantity = " << laserCloudCornerFromMapDSNum << std::endl;
                 std::cout << "Surf Points Quantity = " << laserCloudSurfFromMapDSNum << std::endl;
                 std::cout << "Local Map Points Quantity = " << laserCloudCornerFromMapDSNum + laserCloudSurfFromMapDSNum << std::endl;
-                std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
-                std::cout << "----------------- Current Frame Points Quantity -----------------------" << std::endl;
-                std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+                std::cout << "----> Current Frame Points Quantity " << std::endl;
                 std::cout << "Corner Points Quantity = " << laserCloudCornerLastDSNum << std::endl;
                 std::cout << "Surf + Outlier Points Quantity = " << laserCloudSurfTotalLastDSNum << std::endl;
                 std::cout << "Current Frame Points Quantity = " << laserCloudCornerLastDSNum + laserCloudSurfTotalLastDSNum << std::endl;
-                std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl;
+                std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << std::endl << std::endl;
                 
                 // WILLIAM END               
             }

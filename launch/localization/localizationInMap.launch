@@ -19,5 +19,9 @@
     <node pkg="lego_loam" type="transformFusion_localization"    name="transformFusion"    output="screen"/>
 
     <node pkg="lego_loam" type="publishPCD_localization"         name="publishPCD"         output="screen" launch-prefix="gnome-terminal -e"/>  
+
+    <!--- Velodyne Points Publish -->
+    <!--- "gnome-terminal" means new terminal and "-e" means execute following commands -->
+    <node pkg="velodyne_points_publish" type="velodynePointsPublish_localization" name="velodynePointsPublish" output="screen" launch-prefix="gnome-terminal -e"/>
     
 </launch>

@@ -1246,6 +1246,7 @@ public:
 
         surfOptimizationSearchDuration_Avrg = 0;
         surfOptimizationCalculateDuration_Avrg = 0;
+    std::cout << "---TEST1--- = " << std::endl;
 
         for (int i = 0; i < laserCloudSurfTotalLastDSNum; i++) {
             pointOri = laserCloudSurfTotalLastDS->points[i];
@@ -1259,17 +1260,17 @@ public:
 
             if (pointSearchSqDis[4] < 1.0) {
 
-                float avrg_intensity = ((pointSel.curvature + laserCloudCornerFromMapDS->points[pointSearchInd[0]].curvature + 
-                                                              laserCloudCornerFromMapDS->points[pointSearchInd[1]].curvature + 
-                                                              laserCloudCornerFromMapDS->points[pointSearchInd[2]].curvature + 
-                                                              laserCloudCornerFromMapDS->points[pointSearchInd[3]].curvature + 
-                                                              laserCloudCornerFromMapDS->points[pointSearchInd[4]].curvature))/6.0;
+                float avrg_intensity = ((pointSel.curvature + laserCloudSurfFromMapDS->points[pointSearchInd[0]].curvature + 
+                                                              laserCloudSurfFromMapDS->points[pointSearchInd[1]].curvature + 
+                                                              laserCloudSurfFromMapDS->points[pointSearchInd[2]].curvature + 
+                                                              laserCloudSurfFromMapDS->points[pointSearchInd[3]].curvature + 
+                                                              laserCloudSurfFromMapDS->points[pointSearchInd[4]].curvature))/6.0;
                 float var_intensity = ((pointSel.curvature - avrg_intensity)*(pointSel.curvature - avrg_intensity) + 
-                                       (laserCloudCornerFromMapDS->points[pointSearchInd[0]].curvature - avrg_intensity)*(laserCloudCornerFromMapDS->points[pointSearchInd[0]].curvature - avrg_intensity) + 
-                                       (laserCloudCornerFromMapDS->points[pointSearchInd[1]].curvature - avrg_intensity)*(laserCloudCornerFromMapDS->points[pointSearchInd[1]].curvature - avrg_intensity) +
-                                       (laserCloudCornerFromMapDS->points[pointSearchInd[2]].curvature - avrg_intensity)*(laserCloudCornerFromMapDS->points[pointSearchInd[2]].curvature - avrg_intensity) +
-                                       (laserCloudCornerFromMapDS->points[pointSearchInd[3]].curvature - avrg_intensity)*(laserCloudCornerFromMapDS->points[pointSearchInd[3]].curvature - avrg_intensity) +
-                                       (laserCloudCornerFromMapDS->points[pointSearchInd[4]].curvature - avrg_intensity)*(laserCloudCornerFromMapDS->points[pointSearchInd[4]].curvature - avrg_intensity))/6.0;
+                                       (laserCloudSurfFromMapDS->points[pointSearchInd[0]].curvature - avrg_intensity)*(laserCloudSurfFromMapDS->points[pointSearchInd[0]].curvature - avrg_intensity) + 
+                                       (laserCloudSurfFromMapDS->points[pointSearchInd[1]].curvature - avrg_intensity)*(laserCloudSurfFromMapDS->points[pointSearchInd[1]].curvature - avrg_intensity) +
+                                       (laserCloudSurfFromMapDS->points[pointSearchInd[2]].curvature - avrg_intensity)*(laserCloudSurfFromMapDS->points[pointSearchInd[2]].curvature - avrg_intensity) +
+                                       (laserCloudSurfFromMapDS->points[pointSearchInd[3]].curvature - avrg_intensity)*(laserCloudSurfFromMapDS->points[pointSearchInd[3]].curvature - avrg_intensity) +
+                                       (laserCloudSurfFromMapDS->points[pointSearchInd[4]].curvature - avrg_intensity)*(laserCloudSurfFromMapDS->points[pointSearchInd[4]].curvature - avrg_intensity))/6.0;
                 // std::cout << "var_intensity = " << var_intensity << std::endl;
 
                 for (int j = 0; j < 5; j++) {

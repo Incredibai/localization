@@ -52,17 +52,17 @@ using namespace std;
 typedef pcl::PointXYZI  PointType;
 
 // HDL32
-/*
+
 extern const int N_SCAN = 32;              //16
 extern const int Horizon_SCAN = 2172;      //1800;
 extern const float ang_res_x = 0.166;       //0.2
 extern const float ang_res_y = 1.33;       //2.0
 extern const float ang_bottom = 30.0+0.67;     //15.0+0.1;
 extern const int groundScanInd = 23;//16;       //7
-*/
+
 
 // HDL64E
-
+/*
 extern const int N_SCAN = 64;
 extern const int Horizon_SCAN = 1800;
 extern const float ang_res_x = 0.2;
@@ -83,8 +83,8 @@ extern const double DSFSurroundingKeyPosesLeafSize = 1.0;
 extern const double DSFGlobalMapKeyPosesLeafSize = 1.0;
 extern const double DSFGlobalMapKeyFramesLeafSize = 1.0;
 extern const double W_intensity = 0.0;
+*/
 
-/*
 extern const bool loopClosureEnableFlag = true;
 // WILLIAM BEGIN
 extern const bool mappingDSFEnableFlag = true;
@@ -100,7 +100,7 @@ extern const double DSFGlobalMapKeyPosesLeafSize = 1.0;
 extern const double DSFGlobalMapKeyFramesLeafSize = 1.0;
 extern const double W_intensity = 0.2;
 // WILLIAM END
-*/
+
 
 /*
         downSizeFilterCorner.setLeafSize(0.2, 0.2, 0.2);

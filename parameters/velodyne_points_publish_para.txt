@@ -1,0 +1,94 @@
+# 这是一个参数文件
+# 去你妹的yaml！我再也不用yaml了！简简单单多好！
+
+# 点云数据发布例程的参数，主要是起始跟结束的帧号
+# 注意，参数格式为 [参数名]=数字，没有空格，没有其他多余字符
+##########################
+# 顺便发送GPS消息 0 不发送 1 发送
+GPSEnableFlag=1
+
+# 顺便发送IMU消息 0 不发送 1 发送
+IMUEnableFlag=0
+
+# 帧号步进
+frameStep=1
+
+# 帧率, Hz
+frequency=10
+
+
+######### 数据源 #########
+##########################
+# currently using
+base_dir=/home/william/data/loam/ZJUALV
+#folder=1124_1016
+folder=1122_1440
+#folder=1122_1437
+startFrameNo=1
+endFrameNo=21092
+
+# previously using
+#base_dir=/home/william/data/loam/ZJUALV
+#folder=1122_1437
+#startFrameNo=1
+#endFrameNo=21092
+
+# yq campus 11 24 second circle
+#base_dir=/media/psf/Home/slam_project/ALV_DATA
+#folder=1122_1444
+#startFrameNo=1
+#endFrameNo=5821
+
+# yq campus 11 24
+#base_dir=/media/psf/Home/slam_project/ALV_DATA
+#folder=1122_1426
+#startFrameNo=1
+#endFrameNo=4452
+
+# zjg west campus at summer holiday 2018
+#base_dir=/media/psf/Home/slam_project/ALV_DATA
+#folder=0809_1618
+#startFrameNo=1
+#endFrameNo=10000
+
+
+##########################
+# 塔河建图数据 0~5178
+#base_dir=/root/ZJUALV/DATA
+#folder=0904_1557
+#startFrameNo=2700
+#endFrameNo=4739
+
+
+##########################
+# 玉泉建图数据
+#base_dir=/root/ZJUALV/DATA/Lidar_SLAM_DATA
+#folder=1028_0704
+
+# 闭环1：绕教八一圈 10825 ~ 12000
+#startFrameNo=10820
+#endFrameNo=11733
+
+# 闭环2：毛像到校门口一圈 2202-2904
+#startFrameNo=2182
+#endFrameNo=4650
+
+# 闭环3：三四舍之间快递点
+#startFrameNo=4977
+#endFrameNo=5551
+
+# 闭环4：三四舍-北门-留食-三、四舍
+#startFrameNo=5705
+#endFrameNo=7554
+
+# 闭环5：图书馆门口
+#startFrameNo=1010
+#endFrameNo=1810
+
+# 布吉岛
+#startFrameNo=8000
+#endFrameNo=11733
+
+# 曹光彪楼
+#startFrameNo=8145
+#endFrameNo=11000

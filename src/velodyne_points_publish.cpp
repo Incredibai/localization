@@ -62,6 +62,7 @@ float zaccel;
 // WILLIAM BEGIN
 float pointCloudCount = 0;
 bool savedOneFrameRawData = false;
+// git test
 // WILLIAM END
 
 #ifndef Laser64_MODE

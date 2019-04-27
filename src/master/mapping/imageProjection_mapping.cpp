@@ -50,6 +50,7 @@ private:
     ros::Publisher pubReceivedCloud;
 
     pcl::PointCloud<pcl::PointXYZINormal>::Ptr laserCloudIn;
+    //pcl::PointCloud<PointType>::Ptr laserCloudIn_temp;
 
     pcl::PointCloud<pcl::PointXYZINormal>::Ptr fullCloud;
     pcl::PointCloud<pcl::PointXYZINormal>::Ptr fullInfoCloud;
@@ -125,6 +126,7 @@ public:
     void allocateMemory(){
 
         laserCloudIn.reset(new pcl::PointCloud<pcl::PointXYZINormal>());
+        //laserCloudIn_temp.reset(new pcl::PointCloud<PointType>());
 
         fullCloud.reset(new pcl::PointCloud<pcl::PointXYZINormal>());
         fullInfoCloud.reset(new pcl::PointCloud<pcl::PointXYZINormal>());
@@ -159,6 +161,7 @@ public:
 
     void resetParameters(){
         laserCloudIn->clear();
+        //laserCloudIn_temp->clear();
         groundCloud->clear();
         segmentedCloud->clear();
         segmentedCloudPure->clear();
@@ -198,7 +201,30 @@ public:
         // pcl::copyPointCloud(*temp_cloud, *laserCloudIn);
 
         cloudHeader = laserCloudMsg->header;
-        pcl::fromROSMsg(*laserCloudMsg, *laserCloudIn);
+        /*
+        if (inputIsPointType){
+            pcl::fromROSMsg(*laserCloudMsg, *laserCloudIn_temp);
+            size_t cloudSize = laserCloudIn_temp->points.size();
+            laserCloudIn->is_dense = laserCloudIn_temp->is_dense;
+            laserCloudIn->resize(cloudSize);
+            laserCloudIn->header = laserCloudIn_temp->header;
+            for (size_t i = 0; i < cloudSize; ++i){
+
+                laserCloudIn->points[i].x = laserCloudIn_temp->points[i].x;
+                laserCloudIn->points[i].y = laserCloudIn_temp->points[i].y;
+                laserCloudIn->points[i].z = laserCloudIn_temp->points[i].z;
+                laserCloudIn->points[i].curvature = laserCloudIn_temp->points[i].intensity;
+
+                laserCloudIn->points[i].normal_x = 0;
+                laserCloudIn->points[i].normal_y = 0;
+                laserCloudIn->points[i].normal_z = 0;
+                laserCloudIn->points[i].intensity = 0;
+            } 
+        }
+        */
+        //else if (!inputIsPointType){
+            pcl::fromROSMsg(*laserCloudMsg, *laserCloudIn);
+        //}
         
         // WILLIAM BEGIN
         if (!savedOneFrameRawData){

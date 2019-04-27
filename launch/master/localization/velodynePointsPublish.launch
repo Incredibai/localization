@@ -1,0 +1,5 @@
+<launch>
+    <!--- Velodyne Points Publish -->
+    <!--- "gnome-terminal" means new terminal and "-e" means execute following commands -->
+    <node pkg="velodyne_points_publish" type="velodynePointsPublish" name="velodynePointsPublish" output="screen" launch-prefix="gnome-terminal -e"/>
+</launch>

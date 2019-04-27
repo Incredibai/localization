@@ -85,8 +85,10 @@ extern const double DSFGlobalMapKeyFramesLeafSize = 1.0;
 extern const double W_intensity = 0.0;
 */
 
-extern const bool loopClosureEnableFlag = true;
+
 // WILLIAM BEGIN
+// extern const bool inputIsPointType = true;
+extern const bool loopClosureEnableFlag = true;
 extern const bool mappingDSFEnableFlag = true;
 extern const double mappingProcessInterval = 0.3;
 extern const double localizationProcessInterval = 0.5;
